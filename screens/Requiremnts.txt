@@ -1,0 +1,7 @@
+login *
+Sign up*
+chat session 
+Graphs 
+meal suggestion 
+remote community 
+timetables and reminders 
