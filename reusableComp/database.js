@@ -1,3 +1,4 @@
+
 import { openDatabase } from 'expo-sqlite';
 
 const db = openDatabase('ChildGrowth.db');
@@ -41,6 +42,7 @@ const createTableMeal = async () => {
     console.error('Error in createTableMeal:', error);
   }
 };
+
 
 // Don't call the function at the top level; instead, call it when necessary
 // createTableMeal();

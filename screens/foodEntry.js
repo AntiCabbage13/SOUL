@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Alert ,ScrollView} from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Alert, ScrollView } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MealPrep from '../classes/mealPrep';
 import { useNavigation } from '@react-navigation/native';
-
+import setupNotifications from '../reusableComp/mealReminder';
 
 const FoodEntryForm = ({ route }) => {
   const mealprep = new MealPrep();
@@ -13,6 +13,8 @@ const FoodEntryForm = ({ route }) => {
   const [ingredients, setIngredients] = useState('');
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
+  const [mealType, setMealType] = useState(''); // New state for mealType
+  const [preparationTime, setPreparationTime] = useState(''); // New state for preparationTime
   const navigation = useNavigation();
 
   const apiSuggestedMeals = [
@@ -53,67 +55,27 @@ const FoodEntryForm = ({ route }) => {
     mealprep.cellId = cellId;
 
     mealprep.commitToDatabase();
-
+    setupNotifications();
     console.log(foodName, selectedTime, cellId, ingredients);
     setFoodName('');
     setIngredients('');
   };
 
   const MealPreparationInput = () => {
-    const [mealType, setMealType] = useState('');
-    const [preparationTime, setPreparationTime] = useState('');
-
-    const handleInputBlur = () => {
-      const enteredPrepTime = parseInt(preparationTime, 10);
-
-      if (!isNaN(enteredPrepTime)) {
-        const currentTime = new Date();
-        const servingTimes = {
-          breakfast: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 7, 0),
-          lunch: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 12, 0),
-          supper: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 18, 0),
-          snack1: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 9, 30),
-          snack2: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 15, 30),
-        };
-
-        const validPrepTime =
-          mealType.toLowerCase().includes('snack') ? 10 : 20; // 10 minutes before for snacks, 20 minutes before for meals
-
-        const targetTime = new Date(servingTimes[mealType.toLowerCase()]);
-        targetTime.setMinutes(targetTime.getMinutes() - validPrepTime);
-
-        if (currentTime.getTime() >= targetTime.getTime()) {
-          // Valid input
-          Alert.alert('Success', `Valid preparation time for ${mealType}`);
-        } else {
-          // Invalid input
-          Alert.alert(
-            'Error',
-            `Invalid preparation time for ${mealType}. It should be at least ${validPrepTime} minutes before the serving time.`
-          );
-        }
-      } else {
-        // Invalid input
-        Alert.alert('Error', 'Please enter a valid preparation time.');
-      }
-    };
-
     return (
       <View>
-        <TextInput
+        {/* <TextInput
           placeholder="Enter meal type"
           value={mealType}
           onChangeText={(text) => setMealType(text)}
-          onBlur={handleInputBlur}
-        />
-        <TextInput
+        /> */}
+        {/* <TextInput
           placeholder="Enter preparation time (minutes)"
           keyboardType="numeric"
           value={preparationTime}
           onChangeText={(text) => setPreparationTime(text)}
-          onBlur={handleInputBlur}
         />
-        <Button title="Submit" onPress={handleInputBlur} />
+        <Button title="Submit" onPress={() => handleInputBlur(mealType, preparationTime)} /> */}
       </View>
     );
   };
@@ -129,6 +91,36 @@ const FoodEntryForm = ({ route }) => {
   const handleTimeConfirm = (time) => {
     setSelectedTime(time);
     hideTimePicker();
+    // Validate input when the time is selected
+    handleInputBlur(mealType, preparationTime);
+  };
+
+  const handleInputBlur = () => {
+    const enteredPrepTime = parseInt(preparationTime, 10);
+
+    if (!isNaN(enteredPrepTime)) {
+      const currentTime = new Date();
+      const servingTimes = {
+        breakfast: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 7, 0),
+        lunch: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 12, 0),
+        supper: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 18, 0),
+        snack1: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 9, 30),
+        snack2: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 15, 30),
+      };
+
+      const validPrepTime = mealType.toLowerCase().includes('snack') ? 10 : 20;
+
+      const targetTime = new Date(servingTimes[mealType.toLowerCase()]);
+      targetTime.setMinutes(targetTime.getMinutes() - validPrepTime);
+
+      if (currentTime.getTime() >= targetTime.getTime()) {
+        Alert.alert('Success', `Valid preparation time for ${mealType}`);
+      } else {
+        Alert.alert('Error', `Invalid preparation time for ${mealType}. It should be at least ${validPrepTime} minutes before the serving time.`);
+      }
+    } else {
+      Alert.alert('Error', 'Please enter a valid preparation time.');
+    }
   };
 
   return (
@@ -168,16 +160,16 @@ const FoodEntryForm = ({ route }) => {
             mode="time"
             onConfirm={handleTimeConfirm}
             onCancel={hideTimePicker}
-            onBlur={handleInputBlur}
           />
         </View>
+
+        {/* Meal Preparation Input */}
+        <MealPreparationInput />
 
         {/* API Suggested Meals */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>API Suggested Meals:</Text>
           {apiSuggestedMeals.map((meal) => renderMealView(meal))}
-
-
         </View>
 
         {/* Doctor Recommended Meals */}
@@ -231,9 +223,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   mealPhoto: {
-    width: 100, // Adjust the width as needed
-    height: 100, // Adjust the height as needed
-    backgroundColor: '#ccc', // Placeholder color
+    width: 100,
+    height: 100,
+    backgroundColor: '#ccc',
     borderRadius: 10,
     marginBottom: 8,
   },

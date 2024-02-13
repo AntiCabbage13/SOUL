@@ -5,3 +5,13 @@ Graphs
 meal suggestion 
 remote community 
 timetables and reminders 
+
+==
+    1. To enable doctors to provide nutritional information to the parents' forum.
+    2. To allow doctors to analyze and track a child's growth and development.
+    3. To provide parents with remote interaction capabilities with other parents and doctors.
+    4. To suggest nutritional meal recommendations based on factors such as age, weight, sex, and other relevant considerations.
+    5. To create  customizable meal schedules for children.
+    6. To send reminders to parents to prepare meals on time and gather necessary resources in advance.
+    7. To catalog and manage all food allergies, medical allergies, and dietary restrictions for accurate planning and meal preparation.
+    8. Track child growth using the two  charts provided by WHO 

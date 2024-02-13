@@ -20,46 +20,52 @@ const AddChild = ({ navigation }) => {
     setChildData({ ...childData, [property]: value });
   };
 
-  const saveChildData = async () => {
-    // Check if all required fields are filled
-    if (!childData.firstName || !childData.surname || !childData.dateOfBirth || !childData.gender) {
-      // Handle validation error, e.g., show an error message
-      return;
-    }
+ // Other code ...
+
+const saveChildData = async () => {
+  // Check if all required fields are filled
+  if (!childData.firstName || !childData.surname || !childData.dateOfBirth || !childData.gender) {
+    // Handle validation error, e.g., show an error message
+    return;
+  }
+
+  try {
+    // Create a new Parse object for storing child data
+    const ChildData = Parse.Object.extend('ChildData');
+    const child = new ChildData();
+
+    // Set child data properties
+    child.set('firstName', childData.firstName);
+    child.set('surname', childData.surname);
+    child.set('DateOfBirth', childData.dateOfBirth);
+    child.set('gender', childData.gender);
+
+    // Create a pointer to the User table
+    const User = Parse.Object.extend('User');
+    const user = new User();
+    user.id = Parse.User.current().id; // Use the current user's objectId as the pointer
+
+    // Set the User pointer in the ChildData table
+    child.set('user', user);
+
+    // Save the child data to Back4App
+    const response = await child.save();
+
+    // Retrieve the objectId from the response
+    const childObjectId = response.id;
+
+    // Now you can navigate to the AddMeasurement screen and pass both childObjectId and dateOfBirth
+    navigation.navigate('AddMeasurement', { childObjectId, dateOfBirth: childData.dateOfBirth, gender: childData.gender });
+    console.log('childObjectId:', childObjectId);
+  } catch (error) {
+    // Handle the error, e.g., show an error message
+    console.error('Error saving child data:', error);
+  }
+};
+
+// Other code ...
+
   
-    try {
-      // Create a new Parse object for storing child data
-      const ChildData = Parse.Object.extend('ChildData');
-      const child = new ChildData();
-  
-      // Set child data properties
-      child.set('firstName', childData.firstName);
-      child.set('surname', childData.surname);
-      child.set('dateOfBirth', childData.dateOfBirth);
-      child.set('gender', childData.gender);
-      
-      // Create a pointer to the User table
-      const User = Parse.Object.extend('User');
-      const user = new User();
-      user.id = Parse.User.current().id; // Use the current user's objectId as the pointer
-  
-      // Set the User pointer in the ChildData table
-      child.set('user', user);
-  
-      // Save the child data to Back4App
-      const response = await child.save();
-  
-      // Retrieve the objectId from the response
-      const childObjectId = response.id;
-  
-      // Now you can navigate to the AddMeasurement screen and pass childObjectId
-      navigation.navigate('AddMeasurement', { childObjectId });
-      console.log('childObjectId:', childObjectId);
-    } catch (error) {
-      // Handle the error, e.g., show an error message
-      console.error('Error saving child data:', error);
-    }
-  };
   
 
   return (

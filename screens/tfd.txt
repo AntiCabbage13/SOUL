@@ -1,0 +1,113 @@
+function calculateLengthHeightForAge(childLengthHeight, ageMonths, gender) {
+  // Obtain reference data for Length/Height-for-Age based on gender
+  const referenceData = getReferenceDataForLengthHeight(ageMonths, gender);
+
+  // Calculate z-score and percentile based on child's length/height and reference data
+  const zScore = calculateZScore(childLengthHeight, referenceData.mean, referenceData.standardDeviation);
+  const percentile = calculatePercentile(zScore);
+
+  return {
+    zScore,
+    percentile,
+    interpretation: interpretPercentile(percentile),
+  };
+}
+
+function getReferenceDataForLengthHeight(ageMonths, gender) {
+  // Query reference data based on age and gender from your dataset or API
+  // The reference data should include mean and standard deviation for each percentile
+  // ...
+
+  // For simplicity, assume reference data is obtained for the specific age and gender
+  const mean = /* Mean value from reference data */;
+  const standardDeviation = /* Standard deviation from reference data */;
+
+  return {
+    mean,
+    standardDeviation,
+  };
+}
+
+function calculateZScore(childMeasurement, mean, standardDeviation) {
+  // Calculate z-score based on the formula: z = (X - μ) / σ
+  const zScore = (childMeasurement - mean) / standardDeviation;
+  return zScore;
+}
+
+function calculatePercentile(zScore) {
+  // Use z-score to calculate percentile based on a normal distribution table or algorithm
+  // This could involve interpolation or lookup in a precomputed table
+  // ...
+
+  // For simplicity, assume a basic calculation or lookup for the example
+  const percentile = /* Calculate percentile based on z-score */;
+  return percentile;
+}
+
+function interpretPercentile(percentile) {
+  // Provide interpretation based on the percentile value
+  // For example, <5th percentile might indicate below average height, >95th percentile might indicate above average height, etc.
+  // ...
+
+  // For simplicity, a basic interpretation is provided for the example
+  let interpretation = '';
+  if (percentile < 5) {
+    interpretation = 'Below Average';
+  } else if (percentile > 95) {
+    interpretation = 'Above Average';
+  } else {
+    interpretation = 'Within Average Range';
+  }
+
+  return interpretation;
+}
+
+// Example Usage:
+const childLengthHeight = /* Child's length/height measurement */;
+const ageMonths = /* Child's age in months */;
+const gender = /* Child's gender */;
+const result = calculateLengthHeightForAge(childLengthHeight, ageMonths, gender);
+
+console.log(result);
+
+
+function calculateWeightForAge(childWeight, ageMonths, gender) {
+  // Obtain reference data for Weight-for-Age based on gender
+  const referenceData = getReferenceDataForWeight(ageMonths, gender);
+
+  // Calculate z-score and percentile based on child's weight and reference data
+  const zScore = calculateZScore(childWeight, referenceData.mean, referenceData.standardDeviation);
+  const percentile = calculatePercentile(zScore);
+
+  return {
+    zScore,
+    percentile,
+    interpretation: interpretPercentile(percentile),
+  };
+}
+
+function getReferenceDataForWeight(ageMonths, gender) {
+  // Query reference data based on age and gender from your dataset or API
+  // The reference data should include mean and standard deviation for each percentile
+  // ...
+
+  // For simplicity, assume reference data is obtained for the specific age and gender
+  const mean = /* Mean value from reference data */;
+  const standardDeviation = /* Standard deviation from reference data */;
+
+  return {
+    mean,
+    standardDeviation,
+  };
+}
+
+// The functions calculateZScore, calculatePercentile, and interpretPercentile
+// are reused from the previous example for Length/Height-for-Age
+
+// Example Usage:
+const childWeight = /* Child's weight measurement */;
+const ageMonths = /* Child's age in months */;
+const gender = /* Child's gender */;
+const result = calculateWeightForAge(childWeight, ageMonths, gender);
+
+console.log(result);

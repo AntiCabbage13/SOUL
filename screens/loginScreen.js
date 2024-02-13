@@ -1,12 +1,65 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import Parse from 'parse/react-native';
-
+import { useAppContext } from '../AppContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getHeightForAgeReferenceDataFromAPI } from '../classes/calcualteHeightForage';
+import { getWeightForAgeReferenceDataFromAPI } from '../classes/calcualateweightForage';
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isIncorrectLogin, setIsIncorrectLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useAppContext();
+  const { userData, setUserData } = useAppContext(); // Assuming you have a userData object in your context
+
+  const checkChildDataForUser = (loggedInUser) => {
+    const ChildData = Parse.Object.extend('ChildData');
+    const query = new Parse.Query(ChildData);
+    console.log('this is loggedinUser', loggedInUser);
+
+    // Assuming 'user' is a pointer in the ChildData class that refers to the user
+    query.equalTo('user', loggedInUser);
+
+    query.first()
+      .then((childData) => {
+        if (childData) {
+          // ChildData found, set the childObjectId in the global state
+          const childObjectId = childData.id;
+          const dateOfBirth = childData.get('DateOfBirth');
+          const gender =childData.get('gender');
+          console.log('childobjectID and dateofbirth', dateOfBirth, 'and ', childObjectId,'and',gender);
+          // Set childObjectId in global state
+          setUserData((prevUserData) => ({
+            ...prevUserData,
+            childObjectId,
+          }));
+          saveDataToLocal('childDatainfo', { childObjectId, dateOfBirth, gender });
+
+          // Now you can navigate to the Home screen without passing childObjectId as a parameter
+          navigation.navigate('Home');
+        
+          console.log('you got',childObjectId);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching child data:', error);
+        Alert.alert('Error', 'An error occurred while fetching ChildData.');
+      });
+  };
+  const saveDataToLocal = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify(value));
+      console.log('Data saved to local storage successfully!');
+      console.log('Value before saving to local storage:', value);
+     // getHeightForAgeReferenceDataFromAPI();
+      getWeightForAgeReferenceDataFromAPI();
+    } catch (error) {
+      console.error('Error saving data to local storage:', error);
+
+    }
+  };
+  
 
   const handleLogin = () => {
     // Clear error messages and loading state
@@ -29,17 +82,14 @@ const LoginScreen = ({ navigation }) => {
             .then((loggedInUser) => {
               console.log('User signed in:', loggedInUser);
 
-              // Get the objectId of the logged-in user
-              const objectId = loggedInUser.id;
-
               // Check if the user is a healthcare professional based on the role field
               if (loggedInUser.get('role') === 'ph') {
                 // Navigate to the healthcare professional's home screen
                 console.log('boo yea');
-                navigation.navigate('HealthcareProfessionalHome', { objectId });
+                navigation.navigate('HealthcareProfessionalHome', { objectId: loggedInUser.id });
               } else {
-                // Navigate to the default home screen for other users
-                navigation.navigate('AddChild', { objectId });
+                // Check ChildData for the user
+                checkChildDataForUser(loggedInUser);
               }
             })
             .catch((error) => {
@@ -57,7 +107,6 @@ const LoginScreen = ({ navigation }) => {
         setIsIncorrectLogin(true);
       });
   };
-  
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>

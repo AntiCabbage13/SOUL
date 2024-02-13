@@ -1,33 +1,57 @@
-import { MediaType } from 'expo-media-library';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { initDatabase, fetchMealForCell } from '../reusableComp/retrivemeals.js';
+
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun'];
 const mealTimes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
 const WeeklyMealPlanner = () => {
   const navigation = useNavigation();
+  const [mealData, setMealData] = useState({});
 
   const generateCellId = (day, time) => `${day}-${time}`;
-  // Find the maximum length among the content in daysOfWeek and mealTimes
-  const maxContentLength = Math.max(
-    ...daysOfWeek.map(day => day.length),
-    ...mealTimes.map(time => time.length)
+
+  useEffect(() => {
+    initDatabase(); // Initialize the database when the component mounts
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Fetch meal data for each cell when the screen is focused
+      const fetchData = async () => {
+        const mealData = {};
+        for (const day of daysOfWeek) {
+          for (const time of mealTimes) {
+            const cellId = generateCellId(day, time);
+            // Fetch meal data based on cellId from your database
+            // Replace the following line with your actual fetching logic
+            const meal = await fetchMealForCell(cellId);
+
+            mealData[cellId] = meal;
+          }
+        }
+        setMealData(mealData);
+      };
+
+      fetchData(); // Initial fetch when the screen is mounted
+
+      return () => {
+        // Clean up any subscriptions or timers when the component is unmounted
+      };
+    }, [])
   );
 
-  // Calculate the dynamic width based on the maximum content length
-  const cellWidth = maxContentLength * 10; // You can adjust the multiplier as needed
-
-  // Function to handle cell press
   const handleCellPress = (day, time) => {
-    // Perform actions when a cell is pressed, e.g., navigate to a form
-
     const cellId = generateCellId(day, time);
-    const MealType=(time);
+    const MealType = time;
     navigation.navigate('foodEntry', { MealType, cellId });
-        console.log(`Cell pressed for ${day} at ${time}`);
+    console.log(`Cell pressed for ${day} at ${time}`);
     // Add your navigation logic here
   };
+ 
+
+  const cellWidth = 100; // Adjust the width as needed
 
   return (
     <ScrollView horizontal>
@@ -59,10 +83,10 @@ const WeeklyMealPlanner = () => {
                 style={[styles.cell, styles.weekdayCell, { width: cellWidth }]}
                 onPress={() => handleCellPress(day, time)}
               >
-                {/* Your meal planning component goes here */}
-                {/* You can use this cell to display and edit meals for a specific day and time */}
-                {/* For simplicity, let's just display a placeholder for now */}
-                <Text>Add Meal</Text>
+                {/* Display meal name if available, otherwise show "Add Meal" */}
+                <Text>{mealData[generateCellId(day, time)]?.name || 'Add Meal'}</Text>
+                
+                <Text>{mealData[generateCellId(day, time)]?.time || ''}</Text>
               </TouchableOpacity>
             ))}
           </View>

@@ -1,43 +1,173 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useState,useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import Parse from 'parse/react-native';
-
-const AddMeasurement = ({ route }) => {
-  const { childObjectId } = route.params;
-
+import { useNavigation } from '@react-navigation/native';
+import { useAppContext } from '../AppContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const AddMeasurement = () => {
+  const navigation = useNavigation();
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
-  const [headCircumference, setHeadCircumference] = useState('');
-
+  const [dateOfBirth, setDateOfBirth] = useState(new Date()); // Initialize with a default date
+  const [childObjectId, setChildObjectId] = useState(null);
+  const [gender, setGender] = useState(null);
   Parse.initialize('VXLSRSLFzlwWVZnGLbF57Cm9JgBU1nilXN76HYFA', 'RAzzzAhMZpT8AwpJIHhLubChsR8m7yMvJ1SPvzjW');
   Parse.serverURL = 'https://parseapi.back4app.com/';
 
-  const saveMeasurementData = async () => {
-    const MeasurementData = Parse.Object.extend('addmeasure');
-    const measurement = new MeasurementData();
-
-    // Set measurement data properties
-    measurement.set('weight', parseFloat(weight));
-    measurement.set('height', parseFloat(height));
-    measurement.set('headCircumference', parseFloat(headCircumference));
-
-    // Set a reference to the child's objectId
-    measurement.set('child', {
-      __type: 'Pointer',
-      className: 'ChildData',
-      objectId: childObjectId,
-    });
-
+  const retrieveDataFromLocal = async () => {
     try {
-      // Save the measurement data to the "addmeasure" table
-      await measurement.save();
+      const storedData = await AsyncStorage.getItem('childDatainfo');
 
-      // Measurement data has been saved successfully
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        console.log('Retrieved data from local storage:', parsedData);
+        return parsedData;
+      } else {
+        console.log('No data found in local storage');
+        return null;
+      }
     } catch (error) {
-      // Handle any errors that occur during the save process
-      console.error('Error saving measurement data:', error);
+      console.error('Error retrieving data from local storage:', error);
+      return null;
     }
-  }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const storedChildData = await retrieveDataFromLocal();
+
+      if (storedChildData) {
+        // Update state with retrieved data
+        setChildObjectId(storedChildData.childObjectId);
+        setGender(storedChildData.gender);
+        setDateOfBirth(new Date(storedChildData.dateOfBirth)); // Convert string to Date
+        
+      } else {
+        // Handle the case where no data is found
+        console.log('No stored data found.');
+      }
+    };
+
+    fetchData(); // Call the fetchData function when the component mounts
+
+  }, []);
+
+  // Function to calculate age in months
+  const calculateAge = (birthDate, currentDate) => {
+    const birth = new Date(birthDate);
+    const current = new Date(currentDate);
+
+    const months = (current.getFullYear() - birth.getFullYear()) * 12 +
+      (current.getMonth() - birth.getMonth());
+
+    return months;
+  };
+
+  const saveMeasurementData = async () => {
+    try {
+      const storedChildData = await retrieveDataFromLocal();
+
+      if (storedChildData) {
+        // Now you can use the retrieved data as needed
+        const { childObjectId, dateOfBirth, gender } = storedChildData;
+        console.log('Using retrieved data:', childObjectId, dateOfBirth, gender);
+        // Ensure that dateOfBirth is a valid date
+        if (!dateOfBirth) {
+          console.error('Invalid date of birth:', dateOfBirth);
+          return;
+        }
+      } else {
+        // Handle the case where no data is found
+        console.log('No stored data found.');
+      }
+
+      const MeasurementData = Parse.Object.extend('addmeasure');
+      const measurement = new MeasurementData();
+
+      // Ensure that dateOfBirth is not null before setting it in the measurement object
+      if (!dateOfBirth) {
+        console.error('Invalid date of birth:', dateOfBirth);
+        return;
+      }
+
+      // Convert the date to a string in the format expected by Parse
+      const isoDateString = dateOfBirth.toISOString();
+
+      measurement.set('weight', parseFloat(weight));
+      measurement.set('height', parseFloat(height));
+      measurement.set('Dob', new Date(isoDateString)); // Convert back to Date object
+
+      const currentDate = new Date();
+      measurement.set('DateToday', currentDate);
+      measurement.set('child', {
+        __type: 'Pointer',
+        className: 'ChildData',
+        objectId: childObjectId,
+      });
+
+      const ageInMonths = calculateAge(dateOfBirth, currentDate);
+      console.log('Age in months:', ageInMonths);
+      if (ageInMonths >= 0 && ageInMonths <= 6) {
+        if (parseFloat(height) < 0 || parseFloat(height) > 75) {
+          Alert.alert(
+            'Error',
+            'Height is outside the acceptable range for the child\'s age (6 months - 2 years).'
+          );
+          return;
+        }
+      } else if (ageInMonths > 6 && ageInMonths <= 24) {
+        if (parseFloat(height) < 60 || parseFloat(height) > 95) {
+          Alert.alert(
+            'Error',
+            'Height is outside the acceptable range for the child\'s age (2 - 5 years).'
+          );
+          return;
+        }
+      } else if (ageInMonths > 24 && ageInMonths <= 60) {
+        if (parseFloat(height) < 80 || parseFloat(height) > 125) {
+          Alert.alert(
+            'Error',
+            'Height is outside the acceptable range for the child\'s age (0-5 years).'
+          );
+          return;
+        }
+      } else {
+        if (parseFloat(height) < 45 || parseFloat(height) > 125) {
+          Alert.alert(
+            'Error',
+            'Height is outside the acceptable range for the child\'s age (0-5 years).'
+          );
+          return;
+        }
+      }
+
+      if (gender === 'girl') {
+        if (!validateWeight(ageInMonths, 'girl', parseFloat(weight))) {
+          Alert.alert(
+            'Error',
+            'Weight is outside the acceptable range for the child\'s age and gender.'
+          );
+          return;
+        }
+      } else if (gender === 'boy') {
+        if (!validateWeight(ageInMonths, 'boy', parseFloat(weight))) {
+          Alert.alert(
+            'Error',
+            'Weight is outside the acceptable range for the child\'s age and gender.'
+          );
+          return;
+        }
+      }
+
+      await measurement.save();
+    } catch (error) {
+      console.error('Error saving measurement data:', error);
+      console.log('the retrieved date of birth is', dateOfBirth);
+      console.log('showing child object ', childObjectId);
+    }
+  };
+
+ 
 
   return (
     <View style={styles.container}>
@@ -58,15 +188,9 @@ const AddMeasurement = ({ route }) => {
             value={weight}
             onChangeText={(text) => setWeight(text)}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Head Circumference (cm)"
-            keyboardType="numeric"
-            value={headCircumference}
-            onChangeText={(text) => setHeadCircumference(text)}
-          />
+          {/* ... other UI components */}
           <TouchableOpacity style={styles.button} onPress={saveMeasurementData}>
-            <Text style={styles.buttonText}>Save Measurement Data</Text>
+            <Text style={styles.buttonText}>Add Measurements </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
