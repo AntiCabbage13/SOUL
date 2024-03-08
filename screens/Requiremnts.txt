@@ -1,17 +1,40 @@
-login *
-Sign up*
-chat session 
-Graphs 
-meal suggestion 
-remote community 
-timetables and reminders 
 
-==
-    1. To enable doctors to provide nutritional information to the parents' forum.
-    2. To allow doctors to analyze and track a child's growth and development.
-    3. To provide parents with remote interaction capabilities with other parents and doctors.
-    4. To suggest nutritional meal recommendations based on factors such as age, weight, sex, and other relevant considerations.
-    5. To create  customizable meal schedules for children.
-    6. To send reminders to parents to prepare meals on time and gather necessary resources in advance.
-    7. To catalog and manage all food allergies, medical allergies, and dietary restrictions for accurate planning and meal preparation.
-    8. Track child growth using the two  charts provided by WHO 
+=============== implementaiton overview ========================
+
+********time  ** 1 day *****************************************
+=======catalog and manage all food allergies====================
+-------allow entery of food allergies---------------------------
+-------compare entered meals with catalog-----------------------
+
+********time  ** 2 weeks ***************************************
+=======remote interaction capabilities==========================
+-------remote community-----------------------------------------
+-------share ideas----------------------------------------------
+-------comments-------------------------------------------------
+-------ask idea-------------------------------------------------
+-------chats----------------------------------------------------
+========To enable doctors to provide nutritional information.===
+
+********time taken ** untrucked ********************************
+--------post article and announcements--------------------------  done
+
+
+========analyze and track a child's growth and development.=====
+
+********time taken ** untrucked ********************************
+--------hieght / age *------------------------------------------  done 
+--------wieght / age*-------------------------------------------  done
+
+=======suggest nutritional meal recommendations ================
+********time  ** 1 day *****************************************
+
+-------meal recommendations-------------------------------------
+=======customizable meal schedules==============================
+------- meal timetables----------------------------------------- done
+********time  ** 1 day *****************************************
+-------edit meals----------------------------------------------- done
+-------remove--------------------------------------------------- done
+
+=======reminders================================================
+-------set reminders-------------------------------------------- done
+-------send notifications--------------------------------------- done

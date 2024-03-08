@@ -14,7 +14,6 @@ const setupNotifications = async () => {
         // Add a console log statement when the notification is received
         console.log(`Notification for ${notification.content.title} received at ${new Date().toLocaleTimeString()}`);
 
-        // ... (rest of your code)
 
         return {
           shouldShowAlert: true,
@@ -76,14 +75,14 @@ const setupNotifications = async () => {
         console.log('Scheduling Options:', schedulingOptions);
 
         // Schedule the notification
-        const schedulingResult = await Notifications.scheduleNotificationAsync(schedulingOptions);
+        const schedulingResult = await Notifications.scheduleNotificationAsync(schedulingOptions);// i think  this is where the error start occuring coz the upper side is providing all it's processed info through the console 
 
         // Log after scheduling
         console.log('Notification scheduled for ID', id, 'Scheduling result:', schedulingResult);
       }
     }
   } catch (error) {
-    console.error('Error in setupNotifications:', error);
+    console.error('Error in setupNotifications:', error);// another excution happens here 
   }
 };
 

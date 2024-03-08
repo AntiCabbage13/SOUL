@@ -45,8 +45,18 @@ const WeeklyMealPlanner = () => {
   const handleCellPress = (day, time) => {
     const cellId = generateCellId(day, time);
     const MealType = time;
-    navigation.navigate('foodEntry', { MealType, cellId });
+    const hasMeal = mealData[cellId] !== undefined && mealData[cellId] !== null;
+    navigation.navigate('foodEntry', { MealType, cellId, hasMeal });
+    console.log('has meal =',hasMeal)
     console.log(`Cell pressed for ${day} at ${time}`);
+    // Add your navigation logic here
+  };
+
+  const handleUpdateMeal = (day, time) => {
+    const cellId = generateCellId(day, time);
+    const MealType = time;
+    navigation.navigate('foodEntry', { MealType, cellId, isUpdate: true });
+    console.log(`Update meal for ${day} at ${time}`);
     // Add your navigation logic here
   };
  
@@ -82,6 +92,7 @@ const WeeklyMealPlanner = () => {
                 key={dayIndex}
                 style={[styles.cell, styles.weekdayCell, { width: cellWidth }]}
                 onPress={() => handleCellPress(day, time)}
+                onLongPress={() => handleUpdateMeal(day, time)} // Long press for update
               >
                 {/* Display meal name if available, otherwise show "Add Meal" */}
                 <Text>{mealData[generateCellId(day, time)]?.name || 'Add Meal'}</Text>

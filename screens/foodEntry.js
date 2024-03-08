@@ -15,6 +15,7 @@ const FoodEntryForm = ({ route }) => {
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [mealType, setMealType] = useState(''); // New state for mealType
   const [preparationTime, setPreparationTime] = useState(''); // New state for preparationTime
+  const [showMenu, setShowMenu] = useState(false); // New state for menu visibility
   const navigation = useNavigation();
 
   const apiSuggestedMeals = [
@@ -41,40 +42,90 @@ const FoodEntryForm = ({ route }) => {
     </TouchableOpacity>
   );
 
+  const renderOptions = () => {
+    return (
+      <View>
+        <TouchableOpacity onPress={() => handleRemoveMeal(cellId)}>
+          <Text>Remove Meal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleUpdateMeal(cellId)}>
+          <Text>Update Meal</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   const handleMealPress = (meal) => {
     // Handle the press event for the meal view
     console.log(`Meal ${meal.name} pressed`);
   };
 
+  const handleRemoveMeal = (cellId) => {
+    // Function to remove meal from database
+    console.log('Remove meal:', cellId);
+    // Call the deleteFromDatabase method of MealPrep class with cellId
+    const mealprep = new MealPrep();
+    mealprep.cellId = cellId;
+    mealprep.deleteFromDatabase();
+  };
+  
+  const handleUpdateMeal = (cellId) => {
+    // Show a simple alert to prompt the user to edit the meal
+    Alert.alert(
+      'Edit Meal',
+      'To edit this  meal details simply fill the form and submit changes.',
+      [
+        {
+          text: 'OK',
+          onPress: () => console.log('OK Pressed'),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+
   const handleAddToDatabase = () => {
-    // Handle adding data to the database using MealPrep class
+    // Initialize mealprep before setting its properties
+    const mealprep = new MealPrep();
+  
+    // Set properties of mealprep
     mealprep.foodName = foodName;
     mealprep.ingredients = ingredients;
     mealprep.selectedTime = selectedTime;
     mealprep.mealType = MealType;
     mealprep.cellId = cellId;
-
-    mealprep.commitToDatabase();
-    setupNotifications();
-    console.log(foodName, selectedTime, cellId, ingredients);
-    setFoodName('');
-    setIngredients('');
+    mealprep.hasMeal = route.params.hasMeal; // Add hasMeal to the parameters
+  
+    // Call the addToDatabase() method with the callback function
+    mealprep.addToDatabase()
+      .then((message) => {
+        // Success handler
+        console.log('Success: ', message);
+        // Proceed with other operations like setupNotifications()
+        mealprep.commitToDatabase();
+        setupNotifications();
+        console.log(foodName, selectedTime, cellId, ingredients);
+        setFoodName('');
+        setIngredients('');
+      })
+      .catch((error) => {
+        // Error handler
+        console.error('Error: ', error);
+        // Display an alert to the user if the food has allergens
+        if (error === 'This food or its ingredient is allergic') {
+          Alert.alert('Food Allergy Alert', 'This food or its ingredient is allergic');
+        }
+        // Handle other errors as needed
+      });
   };
-
+  
   const MealPreparationInput = () => {
     return (
       <View>
         {/* <TextInput
-          placeholder="Enter meal type"
-          value={mealType}
-          onChangeText={(text) => setMealType(text)}
         /> */}
         {/* <TextInput
-          placeholder="Enter preparation time (minutes)"
-          keyboardType="numeric"
-          value={preparationTime}
-          onChangeText={(text) => setPreparationTime(text)}
-        />
         <Button title="Submit" onPress={() => handleInputBlur(mealType, preparationTime)} /> */}
       </View>
     );
@@ -122,7 +173,6 @@ const FoodEntryForm = ({ route }) => {
       Alert.alert('Error', 'Please enter a valid preparation time.');
     }
   };
-
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
@@ -136,6 +186,11 @@ const FoodEntryForm = ({ route }) => {
             onChangeText={(text) => setFoodName(text)}
           />
         </View>
+
+
+
+
+
 
         {/* Ingredients */}
         <View style={styles.section}>
@@ -163,6 +218,23 @@ const FoodEntryForm = ({ route }) => {
           />
         </View>
 
+        {/* Vertical Ellipsis Button */}
+        <TouchableOpacity onPress={() => setShowMenu(!showMenu)} style={styles.ellipsisButton}>
+          <Text style={styles.ellipsisText}>...</Text>
+        </TouchableOpacity>
+
+        {/* Menu Options */}
+        {showMenu &&
+          <View style={styles.menuOptions}>
+            <TouchableOpacity onPress={() => handleRemoveMeal(cellId)} style={styles.menuOption}>
+              <Text style={styles.menuOptionText}>Remove Meal</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleUpdateMeal(cellId)} style={styles.menuOption}>
+              <Text style={styles.menuOptionText}>Update Meal</Text>
+            </TouchableOpacity>
+          </View>
+        }
+
         {/* Meal Preparation Input */}
         <MealPreparationInput />
 
@@ -177,7 +249,6 @@ const FoodEntryForm = ({ route }) => {
           <Text style={styles.sectionTitle}>Doctor Recommended Meals:</Text>
           {doctorRecommendedMeals.map((meal) => renderMealView(meal))}
         </View>
-
       </ScrollView>
 
       {/* Floating Button for Add to Database */}
@@ -200,6 +271,11 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 16,
+  },
+  ellipsisButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
   sectionTitle: {
     fontSize: 18,
@@ -255,6 +331,34 @@ const styles = StyleSheet.create({
     color: 'green',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  ellipsisButton: {
+    position: 'absolute',
+    top: -7,
+    right: -10,
+  },
+  ellipsisText: {
+    fontSize: 30,
+    color: 'green',
+    fontWeight: 'bold',
+    transform: [{ rotate: '90deg' }],
+  },
+  menuOptions: {
+    position: 'absolute',
+    top: 20,
+    right: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    zIndex: 1,
+  },
+  menuOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  menuOptionText: {
+    fontSize: 16,
   },
 });
 

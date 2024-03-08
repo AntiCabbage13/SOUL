@@ -25,6 +25,7 @@ import ChartsScreen from "./screens/charts";
 import ArticleUploadScreen from "./screens/ArticalUploadScreen";
 import ArticleDisplayScreen from "./screens/ArticleDisplayScreen";
 import chatscreen from "./screens/chatscreen";
+import AddFoodAllergyScreen from "./screens/AddFoodAllergyScreen";
 //import { SendBirdProvider } from "sendbird-uikit";
 Parse.setAsyncStorage(AsyncStorage);
 const Stack = createNativeStackNavigator();
@@ -33,12 +34,10 @@ const PARSE_APPLICATION_ID = "VXLSRSLFzlwWVZnGLbF57Cm9JgBU1nilXN76HYFA";
 const PARSE_JAVASCRIPT_ID = "RAzzzAhMZpT8AwpJIHhLubChsR8m7yMvJ1SPvzjW";
 const PARSE_HOST_URL = "https://parseapi.back4app.com";
 
-
 function AppWrapper() {
   useEffect(() => {
     DatabaseHelper.getLastInsertedRow();
-    return () => {
-    };
+    return () => {};
   }, []);
 
   const linking = {
@@ -62,9 +61,11 @@ function AppWrapper() {
     <AppProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
-            <Stack.Screen name='chatscreen' component={chatscreen} options={{ title: 'Sendbird Chat' }}/>
+        <Stack.Screen name="MealPreTtable" component={MealPreTtable} />
+          
+          {/*   <Stack.Screen name='chatscreen' component={chatscreen} options={{ title: 'Sendbird Chat' }}/> */}
+          <Stack.Screen name="AddFoodAllergyScreen" component={AddFoodAllergyScreen} />
 
-  
           <Stack.Screen
             name="ArticleDisplayScreen"
             component={ArticleDisplayScreen}
@@ -84,7 +85,6 @@ function AppWrapper() {
           <Stack.Screen name="AddChild" component={AddChild} />
           <Stack.Screen name="AddMeasurement" component={AddMeasurement} />
 
-          <Stack.Screen name="MealPreTtable" component={MealPreTtable} />
           <Stack.Screen name="foodEntry" component={foodEntry} />
 
           <Stack.Screen name="Registration" component={RegistrationScreen} />
