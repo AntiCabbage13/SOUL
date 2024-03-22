@@ -64,100 +64,45 @@ class MealPrep {
     this.#hasMeal = value;
     console.log('Has Meal:', value); // Logging the value of hasMeal
   }
-
   addToDatabase() {
     const hasMeal = this.hasMeal;
     const foodName = this.#foodName.trim().toLowerCase();
     const ingredients = this.#ingredients.trim().toLowerCase();
-  
+
     return new Promise((resolve, reject) => {
       this.#db.transaction((tx) => {
+        console.log('Transaction started');
+
+        // Select everything from the allergies table
         tx.executeSql(
-          'SELECT * FROM allergies WHERE allergy = ?',
-          [foodName],
+          'SELECT * FROM allergies',
+          [],
           (_, { rows }) => {
-            const exactAllergies = rows._array;
-            if (exactAllergies.length > 0) {
-              console.log('Exact allergy found:', exactAllergies);
+            const allAllergies = rows._array;
+            console.log('Allergies table content:', allAllergies);
+          },
+          (error) => {
+            console.error('Error retrieving allergies:', error);
+          }
+        );
+
+        // Check for specific allergies
+        tx.executeSql(
+          'SELECT * FROM allergies WHERE allergy = ? OR ? LIKE "%" || allergy || "%"',
+          [foodName, ingredients],
+          (_, { rows }) => {
+            const allergies = rows._array;
+            console.log('Allergies fetched:', allergies);
+            if (allergies.length > 0) {
+              console.log('Allergies found:', allergies);
               reject('This food or its ingredient is allergic');
               return;
             }
-  
-            // If no exact allergy found, check for partial matches
-            tx.executeSql(
-              'SELECT * FROM allergies WHERE ? LIKE "%" || allergy || "%"',
-              [ingredients],
-              (_, { rows }) => {
-                const partialAllergies = rows._array;
-                if (partialAllergies.length > 0) {
-                  console.log('Partial allergy found:', partialAllergies);
-                  reject('This food or its ingredient is allergic');
-                  return;
-                }
-  
-                // If no allergy found, proceed with database operation
-                if (hasMeal) {
-                  tx.executeSql(
-                    'UPDATE meals SET name = ?, ingredients = ?, time = ?, mealtype = ? WHERE cellid = ?',
-                    [this.#foodName, this.#ingredients, this.#selectedTime ? this.#selectedTime.toLocaleTimeString() : null, this.#mealType, this.#cellid],
-                    (_, results) => {
-                      if (results.rowsAffected > 0) {
-                        console.log('Data updated in the database:', {
-                          foodName: this.#foodName,
-                          ingredients: this.#ingredients,
-                          selectedTime: this.#selectedTime ? this.#selectedTime.toLocaleTimeString() : null,
-                          mealType: this.#mealType,
-                          cellId: this.#cellid,
-                        });
-                        resolve('Data updated in the database');
-                      }
-                    },
-                    (error) => {
-                      console.error('Error updating data in the database:', error);
-                      reject(error);
-                    }
-                  );
-                } else {
-                  tx.executeSql(
-                    'INSERT INTO meals (name, ingredients, time, mealtype, cellid) VALUES (?, ?, ?, ?, ?)',
-                    [this.#foodName, this.#ingredients, this.#selectedTime ? this.#selectedTime.toLocaleTimeString() : null, this.#mealType, this.#cellid],
-                    (_, results) => {
-                      if (results.rowsAffected > 0) {
-                        console.log('Data added to the database:', {
-                          foodName: this.#foodName,
-                          ingredients: this.#ingredients,
-                          selectedTime: this.#selectedTime ? this.#selectedTime.toLocaleTimeString() : null,
-                          mealType: this.#mealType,
-                          cellId: this.#cellid,
-                        });
-  
-                        resolve('Data added to the database');
-  
-                        tx.executeSql('SELECT * FROM meals WHERE id = ?', [results.insertId], (_, { rows }) => {
-                          const lastInsertedRow = rows.item(0);
-                          console.log('Last inserted row:', lastInsertedRow);
-                        });
-                      }
-                    },
-                    (error) => {
-                      console.error('Error inserting data into the database:', error);
-                      reject(error);
-                    }
-                  );
-                }
-              },
-              (error) => {
-                console.error('Error checking partial allergies:', error);
-                reject(error);
-              }
-            );
-          },
-          (error) => {
-            console.error('Error checking exact allergies:', error);
-            // If there are no rows returned, proceed with the if-else statements below
-            // Error case handled here to allow the code to continue executing
-            // Proceeding with the same logic as if no allergies were found
+
+            console.log('No allergies found');
+
             if (hasMeal) {
+              console.log('Updating meal data...');
               tx.executeSql(
                 'UPDATE meals SET name = ?, ingredients = ?, time = ?, mealtype = ? WHERE cellid = ?',
                 [this.#foodName, this.#ingredients, this.#selectedTime ? this.#selectedTime.toLocaleTimeString() : null, this.#mealType, this.#cellid],
@@ -179,6 +124,7 @@ class MealPrep {
                 }
               );
             } else {
+              console.log('Inserting meal data...');
               tx.executeSql(
                 'INSERT INTO meals (name, ingredients, time, mealtype, cellid) VALUES (?, ?, ?, ?, ?)',
                 [this.#foodName, this.#ingredients, this.#selectedTime ? this.#selectedTime.toLocaleTimeString() : null, this.#mealType, this.#cellid],
@@ -191,9 +137,9 @@ class MealPrep {
                       mealType: this.#mealType,
                       cellId: this.#cellid,
                     });
-  
+
                     resolve('Data added to the database');
-  
+
                     tx.executeSql('SELECT * FROM meals WHERE id = ?', [results.insertId], (_, { rows }) => {
                       const lastInsertedRow = rows.item(0);
                       console.log('Last inserted row:', lastInsertedRow);
@@ -206,11 +152,16 @@ class MealPrep {
                 }
               );
             }
+          },
+          (error) => {
+            console.error('Error checking allergies:', error);
+            reject(error);
           }
         );
       });
     });
   }
+
   
   
   deleteFromDatabase() {

@@ -24,8 +24,15 @@ import { AppProvider } from "./AppContext";
 import ChartsScreen from "./screens/charts";
 import ArticleUploadScreen from "./screens/ArticalUploadScreen";
 import ArticleDisplayScreen from "./screens/ArticleDisplayScreen";
-import chatscreen from "./screens/chatscreen";
+import ChatScreen from "./screens/ChatScreen";
 import AddFoodAllergyScreen from "./screens/AddFoodAllergyScreen";
+import HealthcareProfessionalHome from "./screens/HealthcareProfessionalHome";
+import ProfMessagesScreen from "./screens/ProfMessagesScreen";
+import RegisteredChildrenScreen from "./screens/RegisteredChildrenScreen";
+import AddMeasurementprof from "./screens/AddMeasurementprof";
+import DrawerNavigator from "./DrawerNavigator";
+import MessagesScreen from "./screens/MessagesScreen";
+import ChatRoomsScreen from "./screens/ChatRoomsScreen";
 //import { SendBirdProvider } from "sendbird-uikit";
 Parse.setAsyncStorage(AsyncStorage);
 const Stack = createNativeStackNavigator();
@@ -53,6 +60,8 @@ function AppWrapper() {
         AddMeasurement: "AddMeasurement",
         MealPreTtable: "MealPreTtable",
         foodEntry: "foodEntry",
+        RegisteredChildrenScreen: "RegisteredChildrenScreen",
+        AddMeasurementprof: "AddMeasurementprof",
       },
     },
   };
@@ -61,40 +70,121 @@ function AppWrapper() {
     <AppProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
-        <Stack.Screen name="MealPreTtable" component={MealPreTtable} />
-          
-          {/*   <Stack.Screen name='chatscreen' component={chatscreen} options={{ title: 'Sendbird Chat' }}/> */}
-          <Stack.Screen name="AddFoodAllergyScreen" component={AddFoodAllergyScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+       
+          <Stack.Screen
+            name="HealthcareProfessionalHome"
+            component={HealthcareProfessionalHome}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+        
+          <Stack.Screen
+            name="ProfMessagesScreen "
+            component={ProfMessagesScreen}
+          />
 
           <Stack.Screen
-            name="ArticleDisplayScreen"
-            component={ArticleDisplayScreen}
+            name="DrawerNavigator"
+            component={DrawerNavigator}
+            options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="Registration"
+            component={RegistrationScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name=" ChartsScreen"
+            component={ChartsScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MessagesScreen"
+            component={MessagesScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ChatScreen"
+            component={ChatScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="ChatRoomsScreen"
+            component={ChatRoomsScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name=" RegisteredChildrenScreen"
+            component={RegisteredChildrenScreen}
+          />
+
+          <Stack.Screen
+            name="MealPreTtable"
+            component={MealPreTtable}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AddMeasurementprof"
+            component={AddMeasurementprof}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AddFoodAllergyScreen"
+            component={AddFoodAllergyScreen}
+            options={{ headerShown: false }}
+          />
+          {/*   <Stack.Screen name='chatscreen' component={chatscreen} options={{ title: 'Sendbird Chat' }}/> */}
+
           <Stack.Screen
             name="ArticleUploadScreen"
             component={ArticleUploadScreen}
+            options={{ headerShown: false }}
           />
-          <Stack.Screen name=" ChartsScreen" component={ChartsScreen} />
-
-          <Stack.Screen name="Login" component={LoginScreen} />
-
-          <Stack.Screen name="Home" component={HomeScreen} />
 
           {/*  <Stack.Screen name='GrowthChart' component={GrowthChart} />*/}
 
-          <Stack.Screen name="AddChild" component={AddChild} />
-          <Stack.Screen name="AddMeasurement" component={AddMeasurement} />
+          <Stack.Screen
+            name="AddChild"
+            component={AddChild}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AddMeasurement"
+            component={AddMeasurement}
+            options={{ headerShown: false }}
+          />
+           <Stack.Screen
+            name="ProfMessagesScreen"
+            component={ProfMessagesScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="foodEntry"
+            component={foodEntry}
+            options={{ headerShown: false }}
+          />
 
-          <Stack.Screen name="foodEntry" component={foodEntry} />
-
-          <Stack.Screen name="Registration" component={RegistrationScreen} />
-
-          <Stack.Screen name="DataEntry" component={MultiStepFormScreen} />
+          <Stack.Screen
+            name="DataEntry"
+            component={MultiStepFormScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="AwaitVerification"
             component={AwaitEmailVerScreen}
+            options={{ headerShown: false }}
           />
-          <Stack.Screen name="collectedData" component={collectedData} />
+          <Stack.Screen
+            name="collectedData"
+            component={collectedData}
+            options={{ headerShown: false }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </AppProvider>

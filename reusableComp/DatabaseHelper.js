@@ -66,9 +66,11 @@ class DatabaseHelper {
       this.db.transaction((tx) => {
         tx.executeSql(
           `
-          SELECT * FROM weightDataT
+        
+          SELECT chronological_sds
+          FROM weightDataT
           ORDER BY id DESC
-          LIMIT 1
+          LIMIT 1;
           `,
           [],
           (_, { rows }) => {

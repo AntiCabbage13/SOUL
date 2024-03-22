@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     borderColor: 'green',
     borderRadius: 5,
     marginBottom: 10,
-    width: '77%', // Adjust the width as needed to fit the content
+    width: '78.3%', // Adjust the width as needed to fit the content
     overflow: 'hidden', // Add this line to hide overflowing content
   },
   

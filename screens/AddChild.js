@@ -63,11 +63,6 @@ const saveChildData = async () => {
   }
 };
 
-// Other code ...
-
-  
-  
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>

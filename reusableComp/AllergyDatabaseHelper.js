@@ -23,11 +23,12 @@ class AllergyDatabaseHelper {
   }
 
   addAllergy(allergy) {
+    const formattedAllergy = allergy.trim().toLowerCase();
     return new Promise((resolve, reject) => {
       this.db.transaction(tx => {
         tx.executeSql(
           'INSERT INTO allergies (allergy) VALUES (?)',
-          [allergy],
+          [formattedAllergy],
           (_, { insertId }) => {
             console.log('Allergy added with ID: ', insertId);
             resolve(insertId);
@@ -40,7 +41,7 @@ class AllergyDatabaseHelper {
       });
     });
   }
-
+  
   getAllAllergies() {
     return new Promise((resolve, reject) => {
       this.db.transaction(tx => {

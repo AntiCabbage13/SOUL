@@ -1,4 +1,4 @@
-import { openDatabase } from 'expo-sqlite';
+import { openDatabase } from "expo-sqlite";
 
 class DatabaseHelperheight {
   constructor() {
@@ -7,7 +7,7 @@ class DatabaseHelperheight {
   }
 
   setupDatabase() {
-    this.db = openDatabase('ChildGrowth.db');
+    this.db = openDatabase("ChildGrowth.db");
     this.createTable(); // Create the table when setting up the database
   }
 
@@ -26,7 +26,7 @@ class DatabaseHelperheight {
         [],
         () => {},
         (error) => {
-          console.error('Error creating table:', error);
+          console.error("Error creating table:", error);
         }
       );
     });
@@ -47,7 +47,7 @@ class DatabaseHelperheight {
           },
           (error) => {
             // On error, reject the promise with the error
-            console.log('Error inserting data:', error);
+            console.log("Error inserting data:", error);
             reject(error);
           }
         );
@@ -61,23 +61,24 @@ class DatabaseHelperheight {
     }
   }
 
-  getLastInsertedRow() {
+  getLastInsertedRowHeight() {
     return new Promise((resolve, reject) => {
       this.db.transaction((tx) => {
         tx.executeSql(
           `
-          SELECT * FROM heightDataT
+          SELECT chronological_sds
+          FROM heightDataT
           ORDER BY id DESC
-          LIMIT 1
+          LIMIT 1;
           `,
           [],
           (_, { rows }) => {
             const lastInsertedRow = rows.item(0);
             resolve(lastInsertedRow);
-            console.log('i bear the last inserted row', lastInsertedRow);
+            console.log("i bear the last inserted row height", lastInsertedRow);
           },
           (_, error) => {
-            console.error('Error fetching last inserted row:', error);
+            console.error("Error fetching last inserted row:", error);
             reject(error);
           }
         );

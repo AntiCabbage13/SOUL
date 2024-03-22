@@ -5,9 +5,9 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemL
 import { useNavigation } from '@react-navigation/native';
 import AddChild from '../screens/AddChild';
 import AddMeasurement from '../screens/AddMeasurement';
-import chatscreen from '../screens/chatscreen';
 import MealPreTtable from '../screens/MealPreTtable';
 import ChartsScreen from '../screens/charts';
+import  ChatScreen from "../screens/ChatScreen";
 import 'react-native-gesture-handler';
 
 const Tab = createBottomTabNavigator();
@@ -47,7 +47,7 @@ const HomeTab = () => {
       }}
     >
       <Tab.Screen name="Charts" component={ChartsScreen} />
-      <Tab.Screen name="Messages" component={chatscreen} />
+      <Tab.Screen name="Messages" component={ChatScreen} />
       <Tab.Screen name="Utensils" component={MealPreTtable} />
     </Tab.Navigator>
   );

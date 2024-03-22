@@ -1,88 +1,152 @@
-import React from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
-import { Svg, Line, Text } from "react-native-svg";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import DatabaseHelperheight from '../reusableComp/DatabaseHelperheight'; // Corrected import
+import DatabaseHelper from '../reusableComp/DatabaseHelper'; // Corrected import
 
 const ChartsScreen = () => {
-  const xAxisValues = Array.from({ length: 10 }, (_, index) => index + 1);
-  const yAxisValues = Array.from({ length: 8 }, (_, index) => index + 1);
+  const [heightZScore, setHeightZScore] = useState(null);
+  const [weightZScore, setWeightZScore] = useState(null);
 
-  const chartWidth = 30 * xAxisValues.length;
-  const chartHeight = 370;
+  useEffect(() => {
+    // Fetch height z-score
+    DatabaseHelperheight.getLastInsertedRowHeight()
+      .then((lastInsertedRow) => {
+        const { chronological_sds } = lastInsertedRow;
+        setHeightZScore(chronological_sds.toFixed(4)); // Round to 4 decimal places
+      })
+      .catch((error) => {
+        console.error("Error fetching height z-score:", error);
+      });
+
+    // Fetch weight z-score
+    DatabaseHelper.getLastInsertedRow()
+      .then((lastInsertedRow) => {
+        const { chronological_sds } = lastInsertedRow;
+        setWeightZScore(chronological_sds.toFixed(4)); // Round to 4 decimal places
+      })
+      .catch((error) => {
+        console.error("Error fetching weight z-score:", error);
+      });
+  }, []);
+
+  // Function to get weight category based on z-score
+  const getWeightCategory = (zScore) => {
+    if (zScore < -2.5) {
+      return { category: 'Severe Underweight', color: 'purple' };
+    } else if (zScore >= -2.5 && zScore < -1) {
+      return { category: 'Underweight', color: 'blue' };
+    } else if (zScore >= -1 && zScore < 1) {
+      return { category: 'Normal Weight', color: 'green' };
+    } else if (zScore >= 1 && zScore < 2) {
+      return { category: 'Overweight', color: 'orange' };
+    } else if (zScore >= 2) {
+      return { category: 'Obese', color: 'red' };
+    } else {
+      return { category: 'Unknown', color: 'black' };
+    }
+  };
+
+  // Function to get height category based on z-score
+  const getHeightCategory = (zScore) => {
+    if (zScore < -2.5) {
+      return { category: 'Severe Short Stature', color: 'purple' };
+    } else if (zScore >= -2.5 && zScore < -1) {
+      return { category: 'Short Stature', color: 'blue' };
+    } else if (zScore >= -1 && zScore < 1) {
+      return { category: 'Normal Height', color: 'green' };
+    } else if (zScore >= 1 && zScore < 2) {
+      return { category: 'Tall Stature', color: 'orange' };
+    } else if (zScore >= 2) {
+      return { category: 'Very Tall Stature', color: 'red' };
+    } else {
+      return { category: 'Unknown', color: 'black' };
+    }
+  };
+
+  // Function to render weight z-score message
+  const renderWeightMessage = () => {
+    if (weightZScore !== null) {
+      const { category, color } = getWeightCategory(weightZScore);
+      return (
+        <View style={[styles.messageContainer, { backgroundColor: color }]}>
+          <Text style={styles.message}>
+            Weight Z-Score: {weightZScore}{'\n'}
+            <Text style={styles.category}>{category}</Text>
+          </Text>
+          {category !== 'Normal Weight' && (
+            <Text style={styles.advice}>
+              Seek professional help immediately.
+            </Text>
+          )}
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const renderHeightMessage = () => {
+    if (heightZScore !== null) {
+      const { category, color } = getHeightCategory(heightZScore);
+      return (
+        <View style={[styles.messageContainer, { backgroundColor: color }]}>
+          <Text style={styles.message}>
+            Height Z-Score: {heightZScore}{'\n'}
+            <Text style={styles.category}>{category}</Text>
+          </Text>
+          {category !== 'Normal Height' && (
+            <Text style={styles.advice}>
+              Seek professional help immediately.
+            </Text>
+          )}
+        </View>
+      );
+    }
+    return null;
+  };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-    >
-      <Svg
-        height="100%"
-        width={chartWidth}
-        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <View style={styles.chartContainer}>
-          {/* Horizontal Grid Lines */}
-          {yAxisValues.map((y, index) => (
-            <Line
-              key={`gridLineY-${index}`}
-              x1={0}
-              y1={(y / yAxisValues.length) * chartHeight}
-              x2={chartWidth}
-              y2={(y / yAxisValues.length) * chartHeight}
-              stroke="lightgray"
-              strokeWidth="1"
-            />
-          ))}
-
-          {/* Vertical Grid Lines */}
-          {xAxisValues.map((x, index) => (
-            <Line
-              key={`gridLineX-${index}`}
-              x1={(x / xAxisValues.length) * chartWidth}
-              y1={0}
-              x2={(x / xAxisValues.length) * chartWidth}
-              y2={chartHeight}
-              stroke="lightgray"
-              strokeWidth="1"
-            />
-          ))}
-
-          {/* Axes Labels */}
-          <Text
-            x={(chartWidth / 2) - 20}
-            y={chartHeight + 40}
-            fill="black"
-            fontSize="14"
-            textAnchor="middle"
-          >
-            X-Axis Label
-          </Text>
-          <Text
-            x={40}
-            y={(chartHeight / 2) + 10}
-            fill="black"
-            fontSize="14"
-            textAnchor="middle"
-            transform={`rotate(-90, 8, ${(chartHeight / 2) + 10})`}
-          >
-            Y-Axis Label
-          </Text>
-        </View>
-      </Svg>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.heading}>These z-scores represent the measurements taken recently.</Text>
+      {renderWeightMessage()}
+      {renderHeightMessage()}
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
+  container: {
     flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 20,
   },
-  chartContainer: {
-    alignItems: "center",
-    justifyContent: "center",
+  messageContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+    padding: 40,
+    borderRadius: 5,
+  },
+  heading: {
+    fontSize: 20,
+    color: '#000',
+    marginBottom: 30,
+    fontWeight: 'bold',
+    textAlign: 'center',
+
+  },
+  message: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 5,
+  },
+  category: {
+    fontSize: 18,
+    color: '#fff',
+  },
+  advice: {
+    fontSize: 16,
+    color: '#fff',
   },
 });
 
