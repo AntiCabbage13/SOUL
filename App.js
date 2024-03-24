@@ -33,7 +33,8 @@ import AddMeasurementprof from "./screens/AddMeasurementprof";
 import DrawerNavigator from "./DrawerNavigator";
 import MessagesScreen from "./screens/MessagesScreen";
 import ChatRoomsScreen from "./screens/ChatRoomsScreen";
-//import { SendBirdProvider } from "sendbird-uikit";
+import CommunityScreen from "./screens/CommunityScreen";
+import PostScreen from "./screens/PostScreen"
 Parse.setAsyncStorage(AsyncStorage);
 const Stack = createNativeStackNavigator();
 const prefix = Linking.createURL("/");
@@ -70,6 +71,18 @@ function AppWrapper() {
     <AppProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
+        <Stack.Screen
+            name="CommunityScreen"
+            component={CommunityScreen}
+          />
+        <Stack.Screen 
+          name="PostScreen" 
+          component={PostScreen} 
+          options={{ title: 'Post' }}
+        />
+
+
+
         <Stack.Screen name="Home" component={HomeScreen} />
        
           <Stack.Screen

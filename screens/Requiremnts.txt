@@ -37,3 +37,7 @@
 =======catalog and manage all food allergies====================
 -------allow entery of food allergies--------------------------- done 
 -------compare entered meals with catalog----------------------- done
+
+
+
+
