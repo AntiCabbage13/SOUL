@@ -34,6 +34,7 @@ import DrawerNavigator from "./DrawerNavigator";
 import MessagesScreen from "./screens/MessagesScreen";
 import ChatRoomsScreen from "./screens/ChatRoomsScreen";
 import CommunityScreen from "./screens/CommunityScreen";
+import CommentSection from"./screens/CommentSection";
 import PostScreen from "./screens/PostScreen"
 Parse.setAsyncStorage(AsyncStorage);
 const Stack = createNativeStackNavigator();
@@ -88,6 +89,10 @@ function AppWrapper() {
           <Stack.Screen
             name="HealthcareProfessionalHome"
             component={HealthcareProfessionalHome}
+          />
+          <Stack.Screen
+            name="CommentSection"
+            component={CommentSection}
           />
           <Stack.Screen
             name="Login"

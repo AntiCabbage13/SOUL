@@ -102,3 +102,44 @@ export const fetchPosts = async (communityId) => {
     return { success: false, error };
   }
 };
+
+
+export const submitComment = async (communityId, postId, commentText) => {
+  try {
+    // Add comment to Firestore under the specified communityId and postId
+    const commentRef = await addDoc(collection(db, `communities/${communityId}/posts/${postId}/comments`), {
+      text: commentText,
+      timestamp: new Date().toISOString(),
+    });
+
+    console.log('Comment added with ID: ', commentRef.id);
+    return { success: true, commentId: commentRef.id };
+  } catch (error) {
+    console.error('Error adding comment: ', error);
+    return { success: false, error };
+  }
+};
+
+export const fetchComments = async (communityId, postId) => {
+  try {
+    const comments = [];
+    
+    // Query comments collection under the specified communityId and postId
+    const q = query(collection(db, `communities/${communityId}/posts/${postId}/comments`));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+      comments.push({
+        id: doc.id,
+        text: doc.data().text,
+        timestamp: doc.data().timestamp,
+      });
+    });
+
+    console.log('Fetched comments: ', comments);
+    return { success: true, comments };
+  } catch (error) {
+    console.error('Error fetching comments: ', error);
+    return { success: false, error };
+  }
+};
