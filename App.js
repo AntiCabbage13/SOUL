@@ -23,7 +23,6 @@ import DatabaseHelper from "./reusableComp/DatabaseHelper";
 import { AppProvider } from "./AppContext";
 import ChartsScreen from "./screens/charts";
 import ArticleUploadScreen from "./screens/ArticalUploadScreen";
-import ArticleDisplayScreen from "./screens/ArticleDisplayScreen";
 import ChatScreen from "./screens/ChatScreen";
 import AddFoodAllergyScreen from "./screens/AddFoodAllergyScreen";
 import HealthcareProfessionalHome from "./screens/HealthcareProfessionalHome";
@@ -34,8 +33,9 @@ import DrawerNavigator from "./DrawerNavigator";
 import MessagesScreen from "./screens/MessagesScreen";
 import ChatRoomsScreen from "./screens/ChatRoomsScreen";
 import CommunityScreen from "./screens/CommunityScreen";
-import CommentSection from"./screens/CommentSection";
-import PostScreen from "./screens/PostScreen"
+import CommentSection from "./screens/CommentSection";
+import PostScreen from "./screens/PostScreen";
+import ArticleDisplayScreen from "./screens/ArticleDisplayScreen";
 Parse.setAsyncStorage(AsyncStorage);
 const Stack = createNativeStackNavigator();
 const prefix = Linking.createURL("/");
@@ -72,34 +72,32 @@ function AppWrapper() {
     <AppProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
-        <Stack.Screen
-            name="CommunityScreen"
-            component={CommunityScreen}
-          />
-        <Stack.Screen 
-          name="PostScreen" 
-          component={PostScreen} 
-          options={{ title: 'Post' }}
-        />
-
-
-
-        <Stack.Screen name="Home" component={HomeScreen} />
-       
           <Stack.Screen
-            name="HealthcareProfessionalHome"
-            component={HealthcareProfessionalHome}
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="CommentSection"
-            component={CommentSection}
-          />
+
           <Stack.Screen
             name="Login"
             component={LoginScreen}
             options={{ headerShown: false }}
           />
-        
+
+          <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
+
+          <Stack.Screen
+            name="PostScreen"
+            component={PostScreen}
+            options={{ title: "Post" }}
+          />
+
+          <Stack.Screen
+            name="HealthcareProfessionalHome"
+            component={HealthcareProfessionalHome}
+          />
+          <Stack.Screen name="CommentSection" component={CommentSection} />
+
           <Stack.Screen
             name="ProfMessagesScreen "
             component={ProfMessagesScreen}
@@ -116,10 +114,11 @@ function AppWrapper() {
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name=" ChartsScreen"
-            component={ChartsScreen}
+            name="ArticleDisplayScreen"
+            component={ArticleDisplayScreen}
             options={{ headerShown: false }}
           />
+
           <Stack.Screen
             name="MessagesScreen"
             component={MessagesScreen}
@@ -177,7 +176,7 @@ function AppWrapper() {
             component={AddMeasurement}
             options={{ headerShown: false }}
           />
-           <Stack.Screen
+          <Stack.Screen
             name="ProfMessagesScreen"
             component={ProfMessagesScreen}
             options={{ headerShown: false }}

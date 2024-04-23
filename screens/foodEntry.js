@@ -1,39 +1,53 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Alert, ScrollView } from 'react-native';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import MealPrep from '../classes/mealPrep';
-import { useNavigation } from '@react-navigation/native';
-import setupNotifications from '../reusableComp/mealReminder';
-import DatabaseHelperheight from'../reusableComp/DatabaseHelperheight';
-import AllergyDatabaseHelper from '../reusableComp/AllergyDatabaseHelper';
-
-import DatabaseHelper from'../reusableComp/DatabaseHelper';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Alert,
+  ScrollView,
+} from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import MealPrep from "../classes/mealPrep";
+import { useNavigation } from "@react-navigation/native";
+import setupNotifications from "../reusableComp/mealReminder";
+import DatabaseHelperheight from "../reusableComp/DatabaseHelperheight";
+import AllergyDatabaseHelper from "../reusableComp/AllergyDatabaseHelper";
+import { setmealtype } from "../classes/NutrientAnalysis";
+import {FoodAnalysisCall} from'../classes/FoodAnallysisCall';
+import DatabaseHelper from "../reusableComp/DatabaseHelper";
 const FoodEntryForm = ({ route }) => {
   const mealprep = new MealPrep();
 
   const { MealType, cellId } = route.params;
-  const [foodName, setFoodName] = useState('');
-  const [ingredients, setIngredients] = useState('');
+  const [foodName, setFoodName] = useState("");
+  const [ingredients, setIngredients] = useState("");
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [mealType, setMealType] = useState(''); // New state for mealType
-  const [preparationTime, setPreparationTime] = useState(''); // New state for preparationTime
+  const [mealType, setMealType] = useState(""); // New state for mealType
+  const [preparationTime, setPreparationTime] = useState(""); // New state for preparationTime
   const [showMenu, setShowMenu] = useState(false); // New state for menu visibility
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+  //  const { setmealtype } = useMealType();
 
-  const apiSuggestedMeals = [
-    { id: 1, name: 'Meal 1', ingredients: 'Ingredient 1, Ingredient 2, Ingredient 1, Ingredient 2', photo: 'photo1.jpg' },
-    { id: 2, name: 'Meal 2', ingredients: 'Ingredient 3, Ingredient 4', photo: 'photo2.jpg' },
-    { id: 3, name: 'Meal 3', ingredients: 'Ingredi..ent 5, Ingredient 6', photo: 'photo3.jpg' },
-  ];
+  useEffect(() => {
+    setmealtype(MealType);
+  }, [MealType, setmealtype]);
 
-  const doctorRecommendedMeals = [
-    { id: 4, name: 'Recommended Meal 1', ingredients: 'Ingredient 7, Ingredient 8', photo: 'photo4.jpg' },
-    { id: 5, name: 'Recommended Meal 2', ingredients: 'Ingredient 9, Ingredient 10', photo: 'photo5.jpg' },
-  ];
+  
+
+
 
   const renderMealView = (meal) => (
-    <TouchableOpacity key={meal.id} style={styles.mealView} onPress={() => handleMealPress(meal)}>
+    <TouchableOpacity
+      key={meal.id}
+      style={styles.mealView}
+      onPress={() => handleMealPress(meal)}
+    >
       {/* Placeholder for photo (you can replace this with an actual image component) */}
       <View style={styles.mealPhoto} />
 
@@ -65,33 +79,32 @@ const FoodEntryForm = ({ route }) => {
 
   const handleRemoveMeal = (cellId) => {
     // Function to remove meal from database
-    console.log('Remove meal:', cellId);
+    console.log("Remove meal:", cellId);
     // Call the deleteFromDatabase method of MealPrep class with cellId
     const mealprep = new MealPrep();
     mealprep.cellId = cellId;
     mealprep.deleteFromDatabase();
   };
-  
+
   const handleUpdateMeal = (cellId) => {
     // Show a simple alert to prompt the user to edit the meal
     Alert.alert(
-      'Edit Meal',
-      'To edit this  meal details simply fill the form and submit changes.',
+      "Edit Meal",
+      "To edit this  meal details simply fill the form and submit changes.",
       [
         {
-          text: 'OK',
-          onPress: () => console.log('OK Pressed'),
+          text: "OK",
+          onPress: () => console.log("OK Pressed"),
         },
       ],
       { cancelable: false }
     );
   };
 
-
   const handleAddToDatabase = () => {
     // Initialize mealprep before setting its properties
     const mealprep = new MealPrep();
-  
+
     // Set properties of mealprep
     mealprep.foodName = foodName;
     mealprep.ingredients = ingredients;
@@ -99,30 +112,34 @@ const FoodEntryForm = ({ route }) => {
     mealprep.mealType = MealType;
     mealprep.cellId = cellId;
     mealprep.hasMeal = route.params.hasMeal; // Add hasMeal to the parameters
-  
+
     // Call the addToDatabase() method with the callback function
-    mealprep.addToDatabase()
+    mealprep
+      .addToDatabase()
       .then((message) => {
         // Success handler
-        console.log('Success: ', message);
+        console.log("Success: ", message);
         // Proceed with other operations like setupNotifications()
         mealprep.commitToDatabase();
         setupNotifications();
         console.log(foodName, selectedTime, cellId, ingredients);
-        setFoodName('');
-        setIngredients('');
+        setFoodName("");
+        setIngredients("");
       })
       .catch((error) => {
         // Error handler
-        console.error('Error: ', error);
+        console.error("Error: ", error);
         // Display an alert to the user if the food has allergens
-        if (error === 'This food or its ingredient is allergic') {
-          Alert.alert('Food Allergy Alert', 'This food or its ingredient is allergic');
+        if (error === "This food or its ingredient is allergic") {
+          Alert.alert(
+            "Food Allergy Alert",
+            "This food or its ingredient is allergic"
+          );
         }
         // Handle other errors as needed
       });
   };
-  
+
   const MealPreparationInput = () => {
     return (
       <View>
@@ -155,25 +172,58 @@ const FoodEntryForm = ({ route }) => {
     if (!isNaN(enteredPrepTime)) {
       const currentTime = new Date();
       const servingTimes = {
-        breakfast: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 7, 0),
-        lunch: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 12, 0),
-        supper: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 18, 0),
-        snack1: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 9, 30),
-        snack2: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 15, 30),
+        breakfast: new Date(
+          currentTime.getFullYear(),
+          currentTime.getMonth(),
+          currentTime.getDate(),
+          7,
+          0
+        ),
+        lunch: new Date(
+          currentTime.getFullYear(),
+          currentTime.getMonth(),
+          currentTime.getDate(),
+          12,
+          0
+        ),
+        supper: new Date(
+          currentTime.getFullYear(),
+          currentTime.getMonth(),
+          currentTime.getDate(),
+          18,
+          0
+        ),
+        snack1: new Date(
+          currentTime.getFullYear(),
+          currentTime.getMonth(),
+          currentTime.getDate(),
+          9,
+          30
+        ),
+        snack2: new Date(
+          currentTime.getFullYear(),
+          currentTime.getMonth(),
+          currentTime.getDate(),
+          15,
+          30
+        ),
       };
 
-      const validPrepTime = mealType.toLowerCase().includes('snack') ? 10 : 20;
+      const validPrepTime = mealType.toLowerCase().includes("snack") ? 10 : 20;
 
       const targetTime = new Date(servingTimes[mealType.toLowerCase()]);
       targetTime.setMinutes(targetTime.getMinutes() - validPrepTime);
 
       if (currentTime.getTime() >= targetTime.getTime()) {
-        Alert.alert('Success', `Valid preparation time for ${mealType}`);
+        Alert.alert("Success", `Valid preparation time for ${mealType}`);
       } else {
-        Alert.alert('Error', `Invalid preparation time for ${mealType}. It should be at least ${validPrepTime} minutes before the serving time.`);
+        Alert.alert(
+          "Error",
+          `Invalid preparation time for ${mealType}. It should be at least ${validPrepTime} minutes before the serving time.`
+        );
       }
     } else {
-      Alert.alert('Error', 'Please enter a valid preparation time.');
+      Alert.alert("Error", "Please enter a valid preparation time.");
     }
   };
   return (
@@ -190,12 +240,6 @@ const FoodEntryForm = ({ route }) => {
           />
         </View>
 
-
-
-
-
-
-        {/* Ingredients */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ingredients:</Text>
           <TextInput
@@ -207,7 +251,6 @@ const FoodEntryForm = ({ route }) => {
           />
         </View>
 
-        {/* Time Picker */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Select Time:</Text>
           <TouchableOpacity onPress={showTimePicker}>
@@ -221,36 +264,35 @@ const FoodEntryForm = ({ route }) => {
           />
         </View>
 
-        {/* Vertical Ellipsis Button */}
-        <TouchableOpacity onPress={() => setShowMenu(!showMenu)} style={styles.ellipsisButton}>
+        <TouchableOpacity
+          onPress={() => setShowMenu(!showMenu)}
+          style={styles.ellipsisButton}
+        >
           <Text style={styles.ellipsisText}>...</Text>
         </TouchableOpacity>
 
-        {/* Menu Options */}
-        {showMenu &&
+        {showMenu && (
           <View style={styles.menuOptions}>
-            <TouchableOpacity onPress={() => handleRemoveMeal(cellId)} style={styles.menuOption}>
+            <TouchableOpacity
+              onPress={() => handleRemoveMeal(cellId)}
+              style={styles.menuOption}
+            >
               <Text style={styles.menuOptionText}>Remove Meal</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleUpdateMeal(cellId)} style={styles.menuOption}>
+            <TouchableOpacity
+              onPress={() => handleUpdateMeal(cellId)}
+              style={styles.menuOption}
+            >
               <Text style={styles.menuOptionText}>Update Meal</Text>
             </TouchableOpacity>
           </View>
-        }
+        )}
 
-        {/* Meal Preparation Input */}
         <MealPreparationInput />
 
-        {/* API Suggested Meals */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>API Suggested Meals:</Text>
-          {apiSuggestedMeals.map((meal) => renderMealView(meal))}
-        </View>
-
-        {/* Doctor Recommended Meals */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Doctor Recommended Meals:</Text>
-          {doctorRecommendedMeals.map((meal) => renderMealView(meal))}
+          <Text style={styles.sectionTitle}>Child's Meal Suggestions:</Text>
+          <FoodAnalysisCall />
         </View>
       </ScrollView>
 
@@ -267,6 +309,7 @@ const FoodEntryForm = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop:7,
   },
   scrollContainer: {
     flex: 1,
@@ -276,27 +319,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   ellipsisButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   textInput: {
     borderWidth: 2,
-    borderColor: '#003300',
-    borderStyle: 'dotted',
+    borderColor: "#003300",
+    borderStyle: "dotted",
     borderRadius: 10,
     padding: 8,
     fontSize: 16,
   },
   mealView: {
     borderWidth: 2,
-    borderColor: '#003300',
-    borderStyle: 'dotted',
+    borderColor: "#003300",
+    borderStyle: "dotted",
     borderRadius: 10,
     padding: 16,
     marginBottom: 8,
@@ -304,56 +347,56 @@ const styles = StyleSheet.create({
   mealPhoto: {
     width: 100,
     height: 100,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     borderRadius: 10,
     marginBottom: 8,
   },
   mealName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   mealIngredients: {
     fontSize: 14,
   },
   floatingButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 16,
     right: 16,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderRadius: 30,
-    borderColor: 'lightgreen',
+    borderColor: "lightgreen",
     borderWidth: 5,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     width: 60,
     height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
-    color: 'green',
+    color: "green",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   ellipsisButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -7,
     right: -10,
   },
   ellipsisText: {
     fontSize: 30,
-    color: 'green',
-    fontWeight: 'bold',
-    transform: [{ rotate: '90deg' }],
+    color: "green",
+    fontWeight: "bold",
+    transform: [{ rotate: "90deg" }],
   },
   menuOptions: {
-    position: 'absolute',
+    position: "absolute",
     top: 20,
     right: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     zIndex: 1,
   },
   menuOption: {

@@ -1,32 +1,39 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
-import AddChild from '../screens/AddChild';
-import AddMeasurement from '../screens/AddMeasurement';
-import MealPreTtable from '../screens/MealPreTtable';
-import ChartsScreen from '../screens/charts';
-import  ChatScreen from "../screens/ChatScreen";
-import 'react-native-gesture-handler';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { FontAwesome5 } from "@expo/vector-icons";
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItem,
+  DrawerItemList,
+} from "@react-navigation/drawer";
+import { useNavigation, useEffect } from "@react-navigation/native";
+import AddChild from "../screens/AddChild";
+import AddMeasurement from "../screens/AddMeasurement";
+import MealPreTtable from "../screens/MealPreTtable";
+import ChartsScreen from "../screens/charts";
+import ChatScreen from "../screens/ChatScreen";
+import CommunityScreen from "./CommunityScreen";
+import ArticleDisplayScreen from "./ArticleDisplayScreen";
+import AddFoodAllergyScreen from "../screens/AddFoodAllergyScreen";
+import "react-native-gesture-handler";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
 const HomeTab = () => {
-
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color }) => {
           let iconName;
 
-          if (route.name === 'Charts') {
-            iconName = 'chart-line';
-          } else if (route.name === 'Messages') {
-            iconName = 'comment';
-          } else if (route.name === 'Utensils') {
-            iconName = 'utensils';
+          if (route.name === "Charts") {
+            iconName = "chart-line";
+          } else if (route.name === "Messages") {
+            iconName = "comment";
+          } else if (route.name === "Utensils") {
+            iconName = "utensils";
           }
 
           return <FontAwesome5 name={iconName} size={25} color={color} />;
@@ -43,7 +50,7 @@ const HomeTab = () => {
           borderRadius: 15,
         },
         showLabel: false,
-        activeTintColor: '#808080',
+        activeTintColor: "#808080",
       }}
     >
       <Tab.Screen name="Charts" component={ChartsScreen} />
@@ -62,7 +69,7 @@ const AppDrawer = () => {
         name="Home"
         component={HomeTab}
         options={{
-          title: 'Home',
+          title: "Home",
           drawerIcon: ({ color }) => (
             <FontAwesome5 name="home" size={20} color={color} />
           ),
@@ -76,9 +83,7 @@ const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItem
-        label={() => (
-          <FontAwesome5 name="user" size={30} color="#000" />
-        )}
+        label={() => <FontAwesome5 name="user" size={30} color="#000" />}
         onPress={() => {
           // Handle user profile press
         }}
@@ -87,21 +92,35 @@ const CustomDrawerContent = (props) => {
         label="Add Child"
         icon={() => <FontAwesome5 name="plus" size={20} />}
         onPress={() => {
-          props.navigation.navigate('AddChild');
+          props.navigation.navigate("AddChild");
         }}
       />
       <DrawerItem
         label="Take Measurements"
         icon={() => <FontAwesome5 name="ruler" size={20} />}
         onPress={() => {
-          props.navigation.navigate('AddMeasurement');
+          props.navigation.navigate("AddMeasurement");
         }}
       />
       <DrawerItem
-        label="Add Meals"
-        icon={() => <FontAwesome5 name="utensils" size={20} />}
+        label="communities"
+        icon={() => <FontAwesome5 name="users" size={20} />}
         onPress={() => {
-          props.navigation.navigate('MealPreTtable');
+          props.navigation.navigate("CommunityScreen");
+        }}
+      />
+      <DrawerItem
+        label="Articles"
+        icon={() => <FontAwesome5 name="bullhorn" size={20} />}
+        onPress={() => {
+          props.navigation.navigate("ArticleDisplayScreen");
+        }}
+      />
+       <DrawerItem
+        label="Add Allergies"
+        icon={() => <FontAwesome5 name="stop" size={20} />}
+        onPress={() => {
+          props.navigation.navigate("AddFoodAllergyScreen");
         }}
       />
       <DrawerItemList {...props} />

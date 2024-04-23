@@ -85,6 +85,35 @@ class DatabaseHelperheight {
       });
     });
   }
+
+  getLastInsertedRowAgeInMonths() {
+    return new Promise((resolve, reject) => {
+      this.db.transaction((tx) => {
+        tx.executeSql(
+          `
+          SELECT ageInMonths
+          FROM heightDataT
+          ORDER BY id DESC
+          LIMIT 1
+          `,
+          [],
+          (tx, results) => {
+            if (results.rows.length > 0) {
+              const { ageInMonths } = results.rows.item(0);
+              resolve(ageInMonths);
+            } else {
+              reject(new Error("No rows found"));
+            }
+          },
+          (error) => {
+            console.error("Error querying last inserted row:", error);
+            reject(error);
+          }
+        );
+      });
+    });
+  }
+  
 }
 
 export default new DatabaseHelperheight();

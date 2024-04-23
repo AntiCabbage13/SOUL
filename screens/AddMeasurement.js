@@ -1,10 +1,13 @@
 import React, { useState,useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,ActivityIndicator, } from 'react-native';
 import Parse from 'parse/react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../AppContext';
+import { getHeightForAgeReferenceDataFromAPI } from "../classes/calcualteHeightForage";
+import { getWeightForAgeReferenceDataFromAPI } from "../classes/calcualateweightForage";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const AddMeasurement = () => {
+
   const navigation = useNavigation();
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
@@ -13,7 +16,7 @@ const AddMeasurement = () => {
   const [gender, setGender] = useState(null);
   Parse.initialize('VXLSRSLFzlwWVZnGLbF57Cm9JgBU1nilXN76HYFA', 'RAzzzAhMZpT8AwpJIHhLubChsR8m7yMvJ1SPvzjW');
   Parse.serverURL = 'https://parseapi.back4app.com/';
-
+  const [isLoading, setIsLoading] = useState(false); 
   const retrieveDataFromLocal = async () => {
     try {
       const storedData = await AsyncStorage.getItem('childDatainfo');
@@ -37,13 +40,11 @@ const AddMeasurement = () => {
       const storedChildData = await retrieveDataFromLocal();
 
       if (storedChildData) {
-        // Update state with retrieved data
         setChildObjectId(storedChildData.childObjectId);
         setGender(storedChildData.gender);
         setDateOfBirth(new Date(storedChildData.dateOfBirth)); // Convert string to Date
         
       } else {
-        // Handle the case where no data is found
         console.log('No stored data found.');
       }
     };
@@ -65,12 +66,17 @@ const AddMeasurement = () => {
 
   const saveMeasurementData = async () => {
     try {
-      const storedChildData = await retrieveDataFromLocal();
 
+      const storedChildData = await retrieveDataFromLocal();
+      setIsLoading(true);
       if (storedChildData) {
         // Now you can use the retrieved data as needed
         const { childObjectId, dateOfBirth, gender } = storedChildData;
         console.log('Using retrieved data:', childObjectId, dateOfBirth, gender);
+       
+      setIsLoading(false);
+       
+       
         // Ensure that dateOfBirth is a valid date
         if (!dateOfBirth) {
           console.error('Invalid date of birth:', dateOfBirth);
@@ -160,14 +166,13 @@ const AddMeasurement = () => {
       }
 
       await measurement.save();
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Error saving measurement data:', error);
       console.log('the retrieved date of birth is', dateOfBirth);
       console.log('showing child object ', childObjectId);
     }
   };
-
- 
 
   return (
     <View style={styles.container}>
@@ -190,7 +195,14 @@ const AddMeasurement = () => {
           />
           {/* ... other UI components */}
           <TouchableOpacity style={styles.button} onPress={saveMeasurementData}>
-            <Text style={styles.buttonText}>Add Measurements </Text>
+          {isLoading ? (
+              <ActivityIndicator size="small" color="green" /> 
+            ) : (
+              <Text style={styles.buttonText}>Add Measurements </Text>
+
+            )}
+           
+           
           </TouchableOpacity>
         </View>
       </ScrollView>

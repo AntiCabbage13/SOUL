@@ -2,7 +2,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AppContext = createContext();
+import { setmealtype } from './classes/NutrientAnalysis'; // Import the setmealtype function
 
+export const MealTypeContext = createContext();
+
+export const useMealType = () => {
+  return useContext(MealTypeContext);
+};
 export const AppProvider = ({ children }) => {
   const [userData, setUserData] = useState({
     // other properties...

@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import Parse from "parse/react-native";
 import DatabaseHelper from "../reusableComp/DatabaseHelper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,15 +30,7 @@ const retrieveDataFromLocal = async () => {
     return null;
   }
 };
-function calculateAgeInMonths(birthDate, currentDate) {
-  const birth = new Date(birthDate);
-  const current = new Date(currentDate);
 
-  const ageInMilliseconds = current - birth;
-  const ageInMonths = ageInMilliseconds / (1000 * 60 * 60 * 24 * 30.44); // Approximate number of days in a month
-console.log("LOG ageInMonths:", ageInMonths);
-  return Math.floor(ageInMonths);
-}
 const getChildData = async () => {
   try {
     // Call findChild to get the childObjectId
@@ -88,9 +81,7 @@ const getChildData = async () => {
             gender: gender, // Use the retrieved gender
             // Add other properties as needed
             childObjectId: childObjectId,
-
           };
-          
         } else {
           console.log("No matching child data found in addmeasure.");
           return null;
@@ -112,6 +103,7 @@ const getChildData = async () => {
 
 // Function to retrieve weight-for-age reference data from the API
 async function getWeightForAgeReferenceDataFromAPI() {
+  // Function to retrieve weight-for-age reference data from the API
   try {
     // Call getChildData and wait for the result
     const childData = await getChildData();
@@ -126,54 +118,76 @@ async function getWeightForAgeReferenceDataFromAPI() {
     // Convert 'boy' or 'girl' to 'male' or 'female'
     const apiGender = gender === 'boy' ? 'male' : 'female';
 
-    // Calculate age in months
-    const ageInMonths = calculateAgeInMonths(dateOfBirth, currentDate);
+    const measurementRequest = {
+      birth_date: dateOfBirth, // Convert to ISO string
+      observation_date: currentDate, // Convert to ISO string
+      observation_value: weight,
+      sex: apiGender,  // Use the converted gender value
+      measurement_method: "weight", // Assuming this should be 'weight' based on the context
+    };
+    console.log("Measurement Request:", measurementRequest);
+    console.log("Request Body:", JSON.stringify(measurementRequest));
+    try {
+      const response = await fetch(
+        "https://api.rcpch.ac.uk/growth/v1/uk-who/calculation",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Subscription-Key": "991c9100be9d44f69dbee33875b63819", 
+            'Origin': 'https://growth.rcpch.ac.uk/',
+          },
+          body: JSON.stringify(measurementRequest),
+        }
+      );
 
-    // Determine the reference data to use based on gender
-    const referenceData = apiGender === 'male' 
-    ? require("../ReferenceData/boysweightmonhts.json")
-    : require("../ReferenceData/weightmothsgirls.json");
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch reference data. Status: ${response.status}`
+        );
+      }
 
-    // Filter the reference data to only include rows where "Month" matches ageInMonths
-    const filteredData = referenceData.filter(item => parseInt(item.Month) === ageInMonths);
+      const responseData = await response.json();
+      const weight = responseData.child_observation_value.observation_value;
+      const age = responseData.measurement_dates.corrected_calendar_age;
+      const chronological_sds = responseData.measurement_calculated_values.chronological_sds;
 
-    // Check if we have the necessary data
-    if (filteredData.length === 0) {
-      console.log("No reference data found for the given age.");
+      console.log("Extracted weight:", weight);
+      console.log("Extracted age:", age);
+      console.log("Extracted chronological_sds:", chronological_sds);
+
+      const matches = age.match(/(\d+) year(?:s)? and (\d+) day(?:s)?/);
+      const years = matches ? parseInt(matches[1], 10) : 0;
+      const days = matches ? parseInt(matches[2], 10) : 0;
+
+      const ageInMonths = Math.floor((years * 365.25 + days) / 30.44);
+      console.log("Calculated ageInMonths:", ageInMonths);
+     
+      try {
+        await DatabaseHelper.insertData(
+          weight,
+          ageInMonths,
+          childData.childObjectId,
+          chronological_sds
+        );
+        console.log('Insert successful!');
+      } catch (error) {
+        console.error('Insert failed:', error);
+      }
+      
+
+      console.log("Fetched data:", responseData);
+      console.log("z score:", chronological_sds);
+
+      return responseData;
+    } catch (error) {
+      console.error("Error fetching reference data:", error);
       return null;
     }
-
-    // Extract necessary data for z-score calculation
-    const { M, SD0 } = filteredData[0]; // Assuming there's only one matching row
-
-    // Calculate z-score using the standard formula
-    const zScore = (weight - parseFloat(M)) / parseFloat(SD0);
-
-    // Log the calculated z-score
-    console.log("Calculated z-score:", zScore);
-
-    // Insert z-score into the database
-    try {
-      await DatabaseHelper.insertData(
-        weight,
-        ageInMonths,
-        childData.childObjectId,
-        zScore
-      );
-      console.log('Insert successful!');
-    } catch (error) {
-      console.error('Insert failed:', error);
-    }
-
-    // Return the calculated z-score for further processing
-    return zScore;
   } catch (error) {
-    console.error("Error retrieving and calculating z-score:", error);
+    console.error("Error retrieving child data:", error);
     return null;
   }
 }
-
-
-
 
 export { getWeightForAgeReferenceDataFromAPI };

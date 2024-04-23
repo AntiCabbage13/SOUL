@@ -13,7 +13,7 @@ const WeeklyMealPlanner = () => {
   const generateCellId = (day, time) => `${day}-${time}`;
 
   useEffect(() => {
-    initDatabase(); // Initialize the database when the component mounts
+    initDatabase(); 
   }, []);
 
   useFocusEffect(
@@ -24,8 +24,6 @@ const WeeklyMealPlanner = () => {
         for (const day of daysOfWeek) {
           for (const time of mealTimes) {
             const cellId = generateCellId(day, time);
-            // Fetch meal data based on cellId from your database
-            // Replace the following line with your actual fetching logic
             const meal = await fetchMealForCell(cellId);
 
             mealData[cellId] = meal;
@@ -124,7 +122,7 @@ const styles = StyleSheet.create({
     borderColor: 'purple',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 110,
+    height: 90,
     paddingHorizontal: 1,
   },
   weekdaysColumn: {

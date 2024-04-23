@@ -37,7 +37,6 @@ const LoginScreen = ({ navigation }) => {
         navigation.navigate("Home");
   
         if (childData) {
-          // ChildData found, set the childObjectId in the global state
           const childObjectId = childData.id;
           const dateOfBirth = childData.get("DateOfBirth");
           const gender = childData.get("gender");
@@ -49,7 +48,6 @@ const LoginScreen = ({ navigation }) => {
             "and",
             gender
           );
-          // Set childObjectId in global state
           setUserData((prevUserData) => ({
             ...prevUserData,
             childObjectId,
@@ -74,8 +72,8 @@ const LoginScreen = ({ navigation }) => {
       await AsyncStorage.setItem(key, JSON.stringify(value));
       console.log("Data saved to local storage successfully!");
       console.log("Value before saving to local storage:", value);
-      getHeightForAgeReferenceDataFromAPI();
-      getWeightForAgeReferenceDataFromAPI();
+     getHeightForAgeReferenceDataFromAPI();
+     getWeightForAgeReferenceDataFromAPI();
     } catch (error) {
       console.error("Error saving data to local storage:", error);
     }
