@@ -7,6 +7,7 @@ import {
   DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
+import{TouchableOpacity} from "react-native";
 import { useNavigation, useEffect } from "@react-navigation/native";
 import AddChild from "../screens/AddChild";
 import AddMeasurement from "../screens/AddMeasurement";
@@ -16,6 +17,7 @@ import ChatScreen from "../screens/ChatScreen";
 import CommunityScreen from "./CommunityScreen";
 import ArticleDisplayScreen from "./ArticleDisplayScreen";
 import AddFoodAllergyScreen from "../screens/AddFoodAllergyScreen";
+import QuestionnaireSliderScreen from "../screens/QuestionnaireSliderScreen"
 import "react-native-gesture-handler";
 
 const Tab = createBottomTabNavigator();
@@ -32,7 +34,7 @@ const HomeTab = () => {
             iconName = "chart-line";
           } else if (route.name === "Messages") {
             iconName = "comment";
-          } else if (route.name === "Utensils") {
+          } else if (route.name === "TimeTable") {
             iconName = "utensils";
           }
 
@@ -55,7 +57,18 @@ const HomeTab = () => {
     >
       <Tab.Screen name="Charts" component={ChartsScreen} />
       <Tab.Screen name="Messages" component={ChatScreen} />
-      <Tab.Screen name="Utensils" component={MealPreTtable} />
+     {/*  <Tab.Screen name="Utensils" component={MealPreTtable} /> */}
+      <Tab.Screen
+        name="TimeTable"
+        component={MealPreTtable}
+        options={({ navigation }) => ({
+          headerRight: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('AnalyzedFood')}>
+              <FontAwesome5 name="nutritionix" size={30} style={{ marginRight: 15,color:'green'}} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
     </Tab.Navigator>
   );
 };
@@ -116,6 +129,15 @@ const CustomDrawerContent = (props) => {
           props.navigation.navigate("ArticleDisplayScreen");
         }}
       />
+       <DrawerItem
+        label="survey"
+        icon={() => <FontAwesome5 name="stethoscope" size={20} />}
+        onPress={() => {
+          props.navigation.navigate("QuestionnaireSliderScreen");
+        }}
+      />
+
+
        <DrawerItem
         label="Add Allergies"
         icon={() => <FontAwesome5 name="stop" size={20} />}

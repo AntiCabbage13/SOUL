@@ -3,11 +3,6 @@ import { getAnalytics } from "firebase/analytics";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getFirestore, doc, setDoc,getDoc } from 'firebase/firestore';
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCl7Yjh7VLin6TThK3mXUcvqhoflfMLpas",
   authDomain: "nurturecare-bb46e.firebaseapp.com",
@@ -18,6 +13,5 @@ const firebaseConfig = {
   measurementId: "G-CZ11QQ659X"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);

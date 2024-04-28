@@ -1,11 +1,14 @@
 import React, { useEffect, useRef } from "react";
-import { AppRegistry, View } from "react-native";
+import { AppRegistry, View, TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AnimatedMultistep from "react-native-animated-multistep";
 import MultiStepFormScreen from "./screens/MultiStepFormScreen";
 import LoginScreen from "./screens/loginScreen";
 import foodEntry from "./screens/foodEntry";
+import QuestionnaireUploadScreen from "./screens/QuestionnaireUploadScreen";
+import QuestionnaireListScreen from "./screens/QuestionnaireListScreen";
+import QuestionnaireSliderScreen from "./screens/QuestionnaireSliderScreen";
 import setupNotifications from "./reusableComp/mealReminder";
 import { getHeightForAgeReferenceDataFromAPI } from "./classes/calcualteHeightForage";
 import RegistrationScreen from "./screens/RegistrationScreen";
@@ -36,6 +39,8 @@ import CommunityScreen from "./screens/CommunityScreen";
 import CommentSection from "./screens/CommentSection";
 import PostScreen from "./screens/PostScreen";
 import ArticleDisplayScreen from "./screens/ArticleDisplayScreen";
+import AnalyzedFood from "./screens/AnalyzedFood";
+
 Parse.setAsyncStorage(AsyncStorage);
 const Stack = createNativeStackNavigator();
 const prefix = Linking.createURL("/");
@@ -73,14 +78,40 @@ function AppWrapper() {
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
           <Stack.Screen
+            name="HealthcareProfessionalHome"
+            component={HealthcareProfessionalHome}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={{ headerShown: false }}
           />
-
+          <Stack.Screen
+            name="AnalyzedFood"
+            component={AnalyzedFood}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="QuestionnaireSliderScreen"
+            component={QuestionnaireSliderScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="Login"
             component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="QuestionnaireUploadScreen"
+            component={QuestionnaireUploadScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="QuestionnaireListScreen"
+            component={QuestionnaireListScreen}
             options={{ headerShown: false }}
           />
 
@@ -92,10 +123,6 @@ function AppWrapper() {
             options={{ title: "Post" }}
           />
 
-          <Stack.Screen
-            name="HealthcareProfessionalHome"
-            component={HealthcareProfessionalHome}
-          />
           <Stack.Screen name="CommentSection" component={CommentSection} />
 
           <Stack.Screen
@@ -144,7 +171,20 @@ function AppWrapper() {
           <Stack.Screen
             name="MealPreTtable"
             component={MealPreTtable}
-            options={{ headerShown: false }}
+            options={({ navigation }) => ({
+              title: "MealPreTtable",
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("AnalyzedFood")}
+                >
+                  <FontAwesome5
+                    name="search"
+                    size={20}
+                    style={{ marginRight: 15 }}
+                  />
+                </TouchableOpacity>
+              ),
+            })}
           />
           <Stack.Screen
             name="AddMeasurementprof"

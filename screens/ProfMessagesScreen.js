@@ -7,6 +7,7 @@ import {
   Modal,
   Image,
   Text,
+  ImageBackground,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -32,81 +33,87 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-
-const ProfMessagesScreen = ({ route }) => {
-  const { receiverId, senderId, chatId } = route.params || {};
-  
+import { fetchLeftBubbleMessages, fetchImageUrls } from "./HPleftMessageFetch";
+const  ProfMessagesScreen = ({ route }) => {
+  const {RD} = route.params;
+  console.log('recieverId',RD);
   const db = getFirestore(firebaseApp);
   const [textMessages, setTextMessages] = useState([]);
   const [imageMessages, setImageMessages] = useState([]);
   const [text, setText] = useState("");
   const [showIcons, setShowIcons] = useState(false);
+  const [senderObjectId, setSenderObjectId] = useState(null);
   const [showPhotoPicker, setShowPhotoPicker] = useState(false);
-  
-  
+  const [messages, setMessages] = useState([]);
+  const [imageUrls, setImageUrls] = useState([]);
   useEffect(() => {
-    console.log("Receiver ID:", receiverId);
-    console.log("Sender ID:", senderId);
-    console.log("Chat ID:", chatId);
-  
-    if (receiverId && senderId && chatId) {
-      fetchTextMessagesFromFirestore();
-    } else {
-      console.warn("Receiver ID, Sender ID, or Chat ID is missing.");
-    }
-  }, [route.params, receiverId, senderId, chatId]); // Ensure useEffect re-runs when route.params changes or receiverId, senderId, or chatId changes
-  
-
-
-  const fetchTextMessagesFromFirestore = async () => {
-    try {
-      if (chatId) {
-        const chatId = `${senderId}_${receiverId}`;
-        const chatRef = doc(db, "chats", chatId);
-        const chatSnap = await getDoc(chatRef);
-  
-        if (!chatSnap.exists()) {
-          await setDoc(chatRef, {
-            participants: [senderId, receiverId],
-          });
+    const fetchSenderObjectId = async () => {
+      try {
+        const userInfoString = await AsyncStorage.getItem("userInfo");
+        if (userInfoString) {
+          const userInfo = JSON.parse(userInfoString);
+          const { objectId } = userInfo;
+          setSenderObjectId(objectId);
         }
-  
-        const messagesRef = collection(db, "chats", chatId, "messages");
-        const q = query(messagesRef, orderBy("timestamp", "desc"));
-        const querySnapshot = await getDocs(q);
-        const fetchedTextMessages = [];
-  
-        for await (const doc of querySnapshot.docs) {
-          fetchedTextMessages.push({
-            _id: doc.id,
-            text: doc.data().content,
-            createdAt: doc.data().timestamp.toDate(),
-            user: {
-              _id: doc.data().senderId,
-            },
-          });
-        }
-  
-        // Sort text messages based on timestamp
-        fetchedTextMessages.sort((a, b) => a.createdAt - b.createdAt);
-  
-        setTextMessages(fetchedTextMessages);
+      } catch (error) {
+        console.error("Error retrieving sender object ID:", error);
       }
-    } catch (error) {
-      console.error("Error fetching text messages from Firestore:", error);
-    }
-  };
+    };
 
+    fetchSenderObjectId();
+  }, []);
 
+  useEffect(() => {
+    const fetchTextMessagesFromFirestore = async () => {
+      try {
+        if (senderObjectId && RD) {
+          const chatId = `${senderObjectId}_${RD}`;
+          const chatRef = doc(db, "chats", chatId);
+          const chatSnap = await getDoc(chatRef);
+
+          if (!chatSnap.exists()) {
+            await setDoc(chatRef, {
+              participants: [senderObjectId, RD],
+            });
+          }
+
+          const messagesRef = collection(db, "chats", chatId, "messages");
+          const q = query(messagesRef, orderBy("timestamp", "desc"));
+          const querySnapshot = await getDocs(q);
+          const fetchedTextMessages = [];
+
+          for await (const doc of querySnapshot.docs) {
+            fetchedTextMessages.push({
+              _id: doc.id,
+              text: doc.data().content,
+              createdAt: doc.data().timestamp.toDate(),
+              user: {
+                _id: doc.data().senderId,
+              },
+            });
+          }
+
+          // Sort text messages based on timestamp
+          fetchedTextMessages.sort((a, b) => b.createdAt - a.createdAt);
+
+          setTextMessages(fetchedTextMessages);
+        }
+      } catch (error) {
+        console.error("Error fetching text messages from Firestore:", error);
+      }
+    };
+
+    fetchTextMessagesFromFirestore();
+  }, [senderObjectId, RD, db]);
 
   useEffect(() => {
     const fetchImageUrlsFromFirestore = async () => {
       try {
-        if (senderId && receiverId) {
+        if (senderObjectId && RD) {
           const imageQuery = query(
             collection(db, "files"),
-            where("receiverId", "==", receiverId),
-            where("senderId", "==", senderId),
+            where("receiverId", "==", RD),
+            where("senderId", "==", senderObjectId),
             orderBy("createdAt", "desc")
           );
           const querySnapshot = await getDocs(imageQuery);
@@ -118,14 +125,10 @@ const ProfMessagesScreen = ({ route }) => {
               _id: doc.id,
               image: url,
               createdAt: new Date(doc.data().createdAt), // Convert createdAt to Date object
-              user: { _id: senderId },
+              user: { _id: senderObjectId },
             });
           });
-
-          // Sort image messages based on createdAt
-         // fetchedImageMessages.sort((a, b) => a.createdAt - b.createdAt);
-          fetchedImageMessages.sort((a, b) => b.createdAt - a.createdAt);
-
+          fetchedImageMessages.sort((a, b) => a.createdAt - b.createdAt);
           setImageMessages(fetchedImageMessages);
         }
       } catch (error) {
@@ -134,16 +137,94 @@ const ProfMessagesScreen = ({ route }) => {
     };
 
     fetchImageUrlsFromFirestore();
-  }, [senderId, receiverId, db]);
+  }, [senderObjectId, RD, db]);
   const allMessages = [...textMessages, ...imageMessages];
   allMessages.sort((a, b) => b.createdAt - a.createdAt);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (senderObjectId && RD) {
+          // Fetch left bubble messages and image URLs
+          const [leftBubbleMessages, fetchedImageUrlsData] = await Promise.all([
+            fetchLeftBubbleMessages(RD, senderObjectId),
+            fetchImageUrls(RD, senderObjectId),
+          ]);
+
+          // Map fetched image URLs to the left bubble messages
+          const mappedLeftMessages = leftBubbleMessages.map((message) => {
+            const imageUrl = fetchedImageUrlsData.find(
+              (imageUrl) => imageUrl.user._id === message.user._id
+            );
+
+            return {
+              ...message,
+              position: "left",
+              user: {
+                _id: message.user._id,
+              },
+            };
+          });
+
+          // Map fetched image URLs with createdAt to the left bubble messages
+          const mappedLeftImages = leftBubbleMessages.map((message) => {
+            const imageUrl = fetchedImageUrlsData.find(
+              (imageUrl) => imageUrl.user._id === message.user._id
+            );
+
+            return {
+              image: imageUrl ? imageUrl.url : null,
+              position: "left",
+              user: {
+                _id: message.user._id,
+              },
+              createdAt: imageUrl ? imageUrl.createdAt : null, // Add createdAt property
+            };
+          });
+
+          // Combine mapped left bubble messages with sorted text and image messages
+          const combinedMessages = [
+            ...mappedLeftMessages,
+            ...mappedLeftImages,
+            ...textMessages.map((message) => ({
+              ...message,
+              position: "right",
+              user: {
+                _id: message.user._id,
+                name: "User Name",
+              },
+            })),
+            ...imageMessages.map((message) => ({
+              ...message,
+              position: "right",
+              user: {
+                _id: message.user._id,
+                name: "User Name",
+              },
+            })),
+          ];
+
+          // Sort combined messages by createdAt
+          combinedMessages.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+
+          // Set the combined messages to the messages state variable
+          setMessages(combinedMessages);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [RD, senderObjectId, textMessages, imageMessages]);
 
   const openPhotoPicker = async () => {
     try {
       await AsyncStorage.setItem(
         "refData",
-        JSON.stringify({ senderId, receiverId })
-        
+        JSON.stringify({ senderObjectId, receiverId: RD })
       );
       setShowPhotoPicker(true);
     } catch (error) {
@@ -152,8 +233,6 @@ const ProfMessagesScreen = ({ route }) => {
         error
       );
     }
-    console.log("Receiver ID 2:", receiverId);
-    console.log("Sender ID 2:", senderId);
   };
 
   const closePhotoPicker = () => {
@@ -162,43 +241,46 @@ const ProfMessagesScreen = ({ route }) => {
 
   const onSend = async () => {
     try {
-      const sanitizedSenderId = senderId.replace(/\//g, "");
-      const sanitizedReceiverId = receiverId.replace(/\//g, "");
-      console.log("Receiver ID 3:", sanitizedReceiverId);
-      console.log("Sender ID 3:", sanitizedSenderId);
+      const senderId = senderObjectId.replace(/\//g, "");
+      const receiverId = RD.replace(/\//g, "");
+      console.log('receiverID', receiverId);
+      console.log('senderID', senderId);
+      console.log('senderObjectId', senderObjectId);
       const messageToSend = {
         text: text.trim(),
         createdAt: new Date(),
         user: {
-          _id: sanitizedSenderId,
+          _id: senderObjectId,
         },
       };
-
-      setTextMessages((previousTextMessages) =>
+  
+      // Set the message immediately in the local state
+      setTextMessages(previousTextMessages =>
         GiftedChat.append(previousTextMessages, [messageToSend])
       );
-
+  
+      // Store the message in AsyncStorage
       await AsyncStorage.setItem(
         "messages",
         JSON.stringify([...textMessages, messageToSend])
       );
-
-      const chatRef = doc(db, "chats", `${sanitizedSenderId}_${sanitizedReceiverId}`);
+  
+      // Send the message to Firestore
+      const chatRef = doc(db, "chats", `${senderObjectId}_${RD}`);
       await addDoc(collection(chatRef, "messages"), {
         content: text.trim(),
-        senderId: sanitizedSenderId,
-        receiverId: sanitizedReceiverId,
+        senderId: senderObjectId,
+        receiverId: RD,
         timestamp: serverTimestamp(),
       });
-
+  
+      // Clear the input text after sending the message
       setText("");
     } catch (error) {
       console.error("Error sending message:", error);
-      console.log("Receiver ID 3:", receiverId);
-      console.log("Sender ID 3:", senderId);
-      
     }
   };
+  
 
   return (
     <View style={{ flex: 1 }}>
@@ -209,17 +291,17 @@ const ProfMessagesScreen = ({ route }) => {
         onRequestClose={closePhotoPicker}
       >
         <PhotoPicker
-          senderId={senderId}
-          receiverId={receiverId}
+          senderId={senderObjectId}
+          receiverId={RD}
           onClose={closePhotoPicker}
         />
       </Modal>
 
       <GiftedChat
-        messages={allMessages}
+        messages={messages}
         onSend={onSend}
-        user={{ _id: senderId }}
-        renderInputToolbar={() => (
+        user={{ _id: senderObjectId }}
+        renderInputToolbar={(props) => (
           <View style={styles.inputContainer}>
             <TouchableOpacity
               style={styles.toggleIconRow}
@@ -233,12 +315,6 @@ const ProfMessagesScreen = ({ route }) => {
             </TouchableOpacity>
             {showIcons && (
               <View style={styles.iconContainer}>
-                <TouchableOpacity style={styles.iconButton}>
-                  <Icon name="camera" size={24} color="#2fa84f" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton}>
-                  <Icon name="microphone" size={24} color="#2fa84f" />
-                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.iconButton}
                   onPress={openPhotoPicker}
@@ -259,40 +335,66 @@ const ProfMessagesScreen = ({ route }) => {
           </View>
         )}
         renderBubble={(props) => {
-          const isCurrentUser = props.currentMessage.user._id === senderId;
-          const bubbleBackgroundColor = isCurrentUser ? "green" : "#f0f0f0";
+          const isCurrentUser =
+            props.currentMessage.user &&
+            props.currentMessage.user._id === senderObjectId;
+          const bubbleBackgroundColor = isCurrentUser ? "green" : "green";
+          const position =
+            props.currentMessage.position || (isCurrentUser ? "right" : "left");
 
           return (
             <Bubble
               {...props}
+              position={position}
               wrapperStyle={{
                 right: {
-                  backgroundColor: isCurrentUser
-                    ? bubbleBackgroundColor
-                    : "#f0f0f0",
+                  backgroundColor: 'transparent',
                   margin: 5,
                   marginVertical: 14,
                   padding: 9,
+                  borderRadius: 20,
+                  borderWidth: 2,
+                  borderColor: "#2fa84f",
+                  borderStyle: "dotted",
                 },
                 left: {
-                  backgroundColor: isCurrentUser
-                    ? "#f0f0f0"
-                    : bubbleBackgroundColor,
+                  backgroundColor:'transparent',
                   margin: 5,
                   marginVertical: 14,
-                  padding: 9,
+                  padding: 5,
+                  marginLeft: position === "left" ? -40 : 0,
+                  borderRadius: 20,
+                  borderWidth: 2,
+                  borderColor: "#2fa84f",
+                  borderStyle: "dotted",
                 },
               }}
             >
-              {props.currentMessage.image && (
-                <Image
-                  source={{ uri: props.currentMessage.image }}
-                  style={{ width: 200, height: 200 }}
-                />
-              )}
-
               {props.currentMessage.text && !props.currentMessage.image && (
                 <Text>{props.currentMessage.text}</Text>
+              )}
+              {props.currentMessage.image && (
+                <View style={{ width: 200, height: 200 }}>
+                  <ImageBackground
+                    source={{ uri: props.currentMessage.image }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "rgba(0, 128, 0, 0.5)",
+                        padding: 5,
+                      }}
+                    >
+                      <Text style={{ color: "black" }}>
+                        {props.currentMessage.text}
+                      </Text>
+                    </View>
+                  </ImageBackground>
+                </View>
               )}
             </Bubble>
           );
@@ -339,4 +441,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfMessagesScreen;
+export default  ProfMessagesScreen;

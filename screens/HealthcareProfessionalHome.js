@@ -11,7 +11,7 @@ import  ChatRoomsScreen from "../screens/ChatRoomsScreen";
 import RegisteredChildrenScreen from '../screens/RegisteredChildrenScreen';
 import ArticleUploadScreen from '../screens/ArticalUploadScreen';
 import 'react-native-gesture-handler';
-
+import QuestionnaireUploadScreen from'../screens/QuestionnaireUploadScreen';
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -73,12 +73,25 @@ const HealthcareProfessionalHome = () => {
           ),
         }}
       />
+         <Drawer.Screen
+        name="QuestionnaireUploadScreen"
+        component={QuestionnaireUploadScreen}
+        options={{
+          title: 'Questionnaire',
+          drawerIcon: ({ color }) => (
+            <FontAwesome5 name="file-upload" size={20} color={color} />
+          ),
+        }}
+      />
       <Drawer.Screen
           name="RegisteredChildren"
           component={RegisteredChildrenScreen}
           options={{
+            title: 'Registred children',
             drawerIcon: ({ color }) => <FontAwesome5 name="users" size={20} color={color} />,
+            headerShown: false,
           }}
+          
         />
     </Drawer.Navigator>
   );

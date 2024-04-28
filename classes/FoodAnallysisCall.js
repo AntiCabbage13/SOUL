@@ -57,8 +57,6 @@ export const getrecipes = async ({
     mealType: mealType,
     imageSize:"REGULAR",
     random: "true",
-    
-    
   };
 
   dietLabels.forEach((label, index) => {
@@ -95,10 +93,6 @@ export const getrecipes = async ({
     );
   }
 };
-
-
-
-
 
 export const FoodAnalysisCall = () => {
   const [recipes, setRecipes] = useState([]);

@@ -60,6 +60,35 @@ const fetchMealForCell = async (cellId) => {
   });
 };
 
+
+
+
+const fetchAllMeals = async () => {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM meals',
+        [],
+        (_, { rows }) => {
+          const meals = [];
+          for (let i = 0; i < rows.length; i++) {
+            meals.push(rows.item(i));
+          }
+          console.log('Fetched all meals:', meals);
+          resolve(meals);
+        },
+        (_, error) => {
+          console.error('Error fetching all meals:', error);
+          reject(error);
+        }
+      );
+    });
+  });
+};
+
+
+
+
 const fetchAllMealIds = async () => {
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {
@@ -109,4 +138,4 @@ const fetchTimeAndMealNameForCellById = async (id) => {
   });
 };
 
-export { db, initDatabase, fetchMealForCell, fetchTimeAndMealNameForCellById, fetchAllMealIds };
+export { db, initDatabase, fetchMealForCell,fetchAllMeals, fetchTimeAndMealNameForCellById, fetchAllMealIds };

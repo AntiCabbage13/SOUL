@@ -140,84 +140,84 @@ const MessagesScreen = ({ route }) => {
   const allMessages = [...textMessages, ...imageMessages];
   allMessages.sort((a, b) => b.createdAt - a.createdAt);
 
- useEffect(() => {
-  const fetchData = async () => {
-    try {
-      if (senderObjectId && objectId) {
-        // Fetch left bubble messages and image URLs
-        const [leftBubbleMessages, fetchedImageUrlsData] = await Promise.all([
-          fetchLeftBubbleMessages(objectId, senderObjectId),
-          fetchImageUrls(objectId, senderObjectId),
-        ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (senderObjectId && objectId) {
+          // Fetch left bubble messages and image URLs
+          const [leftBubbleMessages, fetchedImageUrlsData] = await Promise.all([
+            fetchLeftBubbleMessages(objectId, senderObjectId),
+            fetchImageUrls(objectId, senderObjectId),
+          ]);
 
-        // Map fetched image URLs to the left bubble messages
-        const mappedLeftMessages = leftBubbleMessages.map((message) => {
-          const imageUrl = fetchedImageUrlsData.find(
-            (imageUrl) => imageUrl.user._id === message.user._id
+          // Map fetched image URLs to the left bubble messages
+          const mappedLeftMessages = leftBubbleMessages.map((message) => {
+            const imageUrl = fetchedImageUrlsData.find(
+              (imageUrl) => imageUrl.user._id === message.user._id
+            );
+
+            return {
+              ...message,
+              position: "left",
+              user: {
+                _id: message.user._id,
+              },
+            };
+          });
+
+          // Map fetched image URLs with createdAt to the left bubble messages
+          const mappedLeftImages = leftBubbleMessages.map((message) => {
+            const imageUrl = fetchedImageUrlsData.find(
+              (imageUrl) => imageUrl.user._id === message.user._id
+            );
+
+            return {
+              image: imageUrl ? imageUrl.url : null,
+              position: "left",
+              user: {
+                _id: message.user._id,
+              },
+              createdAt: imageUrl ? imageUrl.createdAt : null, // Add createdAt property
+            };
+          });
+
+          // Combine mapped left bubble messages with sorted text and image messages
+          const combinedMessages = [
+            ...mappedLeftMessages,
+            ...mappedLeftImages,
+            ...textMessages.map((message) => ({
+              ...message,
+              position: "right",
+              user: {
+                _id: message.user._id,
+                name: "User Name",
+              },
+            })),
+            ...imageMessages.map((message) => ({
+              ...message,
+              position: "right",
+              user: {
+                _id: message.user._id,
+                name: "User Name",
+              },
+            })),
+          ];
+
+          // Sort combined messages by createdAt
+          combinedMessages.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
 
-          return {
-            ...message,
-            position: "left",
-            user: {
-              _id: message.user._id,
-            },
-          };
-        });
-
-        // Map fetched image URLs with createdAt to the left bubble messages
-        const mappedLeftImages = leftBubbleMessages.map((message) => {
-          const imageUrl = fetchedImageUrlsData.find(
-            (imageUrl) => imageUrl.user._id === message.user._id
-          );
-
-          return {
-            image: imageUrl ? imageUrl.url : null,
-            position: "left",
-            user: {
-              _id: message.user._id,
-            },
-            createdAt: imageUrl ? imageUrl.createdAt : null, // Add createdAt property
-          };
-        });
-
-        // Combine mapped left bubble messages with sorted text and image messages
-        const combinedMessages = [
-          ...mappedLeftMessages,
-          ...mappedLeftImages,
-          ...textMessages.map((message) => ({
-            ...message,
-            position: "right",
-            user: {
-              _id: message.user._id,
-              name: "User Name",
-            },
-          })),
-          ...imageMessages.map((message) => ({
-            ...message,
-            position: "right",
-            user: {
-              _id: message.user._id,
-              name: "User Name",
-            },
-          })),
-        ];
-
-        // Sort combined messages by createdAt
-        combinedMessages.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-
-        // Set the combined messages to the messages state variable
-        setMessages(combinedMessages);
+          // Set the combined messages to the messages state variable
+          setMessages(combinedMessages);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+    };
 
-  fetchData();
-}, [objectId, senderObjectId, textMessages, imageMessages]);
+    fetchData();
+  }, [objectId, senderObjectId, textMessages, imageMessages]);
 
   const openPhotoPicker = async () => {
     try {
@@ -307,9 +307,6 @@ const MessagesScreen = ({ route }) => {
             </TouchableOpacity>
             {showIcons && (
               <View style={styles.iconContainer}>
-                <TouchableOpacity style={styles.iconButton}>
-                  <Icon name="camera" size={24} color="#2fa84f" />
-                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.iconButton}
                   onPress={openPhotoPicker}
@@ -329,64 +326,71 @@ const MessagesScreen = ({ route }) => {
             </TouchableOpacity>
           </View>
         )}
-      renderBubble={(props) => {
-  const isCurrentUser =
-    props.currentMessage.user &&
-    props.currentMessage.user._id === senderObjectId;
-  const bubbleBackgroundColor = isCurrentUser ? "green" : "green";
-  const position =
-    props.currentMessage.position || (isCurrentUser ? "right" : "left");
+        renderBubble={(props) => {
+          const isCurrentUser =
+            props.currentMessage.user &&
+            props.currentMessage.user._id === senderObjectId;
+          const bubbleBackgroundColor = isCurrentUser ? "green" : "green";
+          const position =
+            props.currentMessage.position || (isCurrentUser ? "right" : "left");
 
-  return (
-    <Bubble
-      {...props}
-      position={position}
-      wrapperStyle={{
-        right: {
-          backgroundColor: bubbleBackgroundColor,
-          margin: 5,
-          marginVertical: 14,
-          padding: 9,
-        },
-        left: {
-          backgroundColor: bubbleBackgroundColor,
-          margin: 5,
-          marginVertical: 14,
-          padding: 9,
-          marginLeft: position === "left" ? -55 : 0,
-        },
-      }}
-    >
-      {props.currentMessage.text && !props.currentMessage.image && (
-        <Text>{props.currentMessage.text}</Text>
-      )}
-      {props.currentMessage.image && (
-        <View style={{ width: 200, height: 200 }}>
-          <ImageBackground
-            source={{ uri: props.currentMessage.image }}
-            style={{
-              width: "100%",
-              height: "100%",
-              justifyContent: "flex-end",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "rgba(0, 128, 0, 0.5)",
-                padding: 5,
+          return (
+            <Bubble
+              {...props}
+              position={position}
+              wrapperStyle={{
+                right: {
+                  backgroundColor: 'transparent',
+                  margin: 5,
+                  marginVertical: 14,
+                  padding: 9,
+                  borderRadius: 20,
+                  borderWidth: 2,
+                  borderColor: "#2fa84f",
+                  borderStyle: "dotted",
+                },
+                left: {
+                  backgroundColor:'transparent',
+                  margin: 5,
+                  marginVertical: 14,
+                  padding: 5,
+                  marginLeft: position === "left" ? -40 : 0,
+                  borderRadius: 20,
+                  borderWidth: 2,
+                  borderColor: "#2fa84f",
+                  borderStyle: "dotted",
+                },
               }}
             >
-              <Text style={{ color: "white" }}>
-                {props.currentMessage.text}
-              </Text>
-            </View>
-          </ImageBackground>
-        </View>
-      )}
-    </Bubble>
-  );
-}}
-        
+              {props.currentMessage.text && !props.currentMessage.image && (
+                <Text>{props.currentMessage.text}</Text>
+              )}
+              {props.currentMessage.image && (
+                <View style={{ width: 200, height: 200 }}>
+                  <ImageBackground
+                    source={{ uri: props.currentMessage.image }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "rgba(0, 128, 0, 0.5)",
+                        padding: 5,
+                      }}
+                    >
+                      <Text style={{ color: "black" }}>
+                        {props.currentMessage.text}
+                      </Text>
+                    </View>
+                  </ImageBackground>
+                </View>
+              )}
+            </Bubble>
+          );
+        }}
         dateFormat="MMM D, YYYY"
         inverted={true}
       />

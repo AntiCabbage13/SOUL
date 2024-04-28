@@ -309,11 +309,11 @@ const FoodEntryForm = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop:7,
   },
   scrollContainer: {
     flex: 1,
     padding: 16,
+    marginTop: 50,
   },
   section: {
     marginBottom: 16,
