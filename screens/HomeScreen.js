@@ -136,8 +136,13 @@ const CustomDrawerContent = (props) => {
           props.navigation.navigate("QuestionnaireSliderScreen");
         }}
       />
-
-
+<DrawerItem
+        label="Help"
+        icon={() => <FontAwesome5 name="question-mark" size={20} />}
+        onPress={() => {
+          props.navigation.navigate("HelpScreen");
+        }}
+      />
        <DrawerItem
         label="Add Allergies"
         icon={() => <FontAwesome5 name="stop" size={20} />}

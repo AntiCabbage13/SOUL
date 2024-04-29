@@ -62,7 +62,7 @@ const setupNotifications = async () => {
         const schedulingOptions = {
           content: {
             title: 'Meal Reminder',
-            body: `It's time for your ${name} meal!`, // Use the retrieved name
+            body: `It's time to prepare ${name} meal!`, // Use the retrieved name
            // sound: Platform.OS === 'android' ? 'default' : 'default', 
             sound: Platform.OS === "android" ? null : "default",
           },

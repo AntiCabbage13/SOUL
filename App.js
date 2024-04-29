@@ -40,7 +40,7 @@ import CommentSection from "./screens/CommentSection";
 import PostScreen from "./screens/PostScreen";
 import ArticleDisplayScreen from "./screens/ArticleDisplayScreen";
 import AnalyzedFood from "./screens/AnalyzedFood";
-
+import HelpScreen from "./screens/HelpScreen";
 Parse.setAsyncStorage(AsyncStorage);
 const Stack = createNativeStackNavigator();
 const prefix = Linking.createURL("/");
@@ -77,16 +77,34 @@ function AppWrapper() {
     <AppProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
-          <Stack.Screen
+        <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
+        <Stack.Screen
+            name="HelpScreen"
+            component={HelpScreen}
+            options={{ headerShown: false }}
+          />
+        <Stack.Screen
             name="HealthcareProfessionalHome"
             component={HealthcareProfessionalHome}
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="Home"
-            component={HomeScreen}
+            name="Login"
+            component={LoginScreen}
             options={{ headerShown: false }}
           />
+       
+          <Stack.Screen
+            name="AddFoodAllergyScreen"
+            component={AddFoodAllergyScreen}
+            options={{ headerShown: false }}
+          />
+        
+
           <Stack.Screen
             name="AnalyzedFood"
             component={AnalyzedFood}
@@ -95,11 +113,6 @@ function AppWrapper() {
           <Stack.Screen
             name="QuestionnaireSliderScreen"
             component={QuestionnaireSliderScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
             options={{ headerShown: false }}
           />
 
@@ -191,12 +204,6 @@ function AppWrapper() {
             component={AddMeasurementprof}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="AddFoodAllergyScreen"
-            component={AddFoodAllergyScreen}
-            options={{ headerShown: false }}
-          />
-          {/*   <Stack.Screen name='chatscreen' component={chatscreen} options={{ title: 'Sendbird Chat' }}/> */}
 
           <Stack.Screen
             name="ArticleUploadScreen"

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList, Button } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList, ScrollView } from 'react-native';
 import AllergyDatabaseHelper from '../reusableComp/AllergyDatabaseHelper';
 import Ionicons from '@expo/vector-icons/Ionicons';
+
 const AddFoodAllergyScreen = () => {
   const [allergy, setAllergy] = useState('');
   const [allergies, setAllergies] = useState([]);
@@ -80,7 +81,7 @@ const AddFoodAllergyScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.label}>Enter Food Allergy:</Text>
       <TextInput
         style={styles.input}
@@ -106,16 +107,18 @@ const AddFoodAllergyScreen = () => {
         )}
         keyExtractor={item => item.id.toString()}
       />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    marginTop: 50, // Adjust the marginTop as needed for your title to be visible
+    marginBottom: 10,
   },
   label: {
     fontSize: 18,
@@ -161,8 +164,6 @@ const styles = StyleSheet.create({
     width: '78.3%', // Adjust the width as needed to fit the content
     overflow: 'hidden', // Add this line to hide overflowing content
   },
-  
-  
 });
 
 export default AddFoodAllergyScreen;
