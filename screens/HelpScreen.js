@@ -27,6 +27,7 @@ const HelpScreen = () => {
   ];
 
   const [toggleState, setToggleState] = useState(Array(faqs.length).fill(false));
+  const [showPolicy, setShowPolicy] = useState(false);
 
   const toggleFAQ = (index) => {
     setToggleState(
@@ -66,6 +67,27 @@ const HelpScreen = () => {
         For technical issues or inquiries related to this application, please send an email to{' '}
         <Text style={styles.email}>ndixchilddev@gmail.com</Text>.
       </Text>
+
+      <TouchableOpacity onPress={() => setShowPolicy(!showPolicy)}>
+        <Text style={[styles.title, { marginTop: 20 }]}>
+          {showPolicy ? 'Read Less' : 'Read More'} User Policy
+        </Text>
+      </TouchableOpacity>
+
+      {showPolicy && (
+        <View style={styles.policyContainer}>
+          <Text style={styles.policyTitle}>User Policy</Text>
+          <Text style={styles.policyText}>
+            <Text style={styles.policySubtitle}>Interactions with Other Users:</Text> All users must ensure respectful interactions with others. Obscene, nudity, tribalism, and disrespectful behavior are strictly prohibited. Every user must respect other people's views.
+          </Text>
+          <Text style={styles.policyText}>
+            <Text style={styles.policySubtitle}>Content Sharing:</Text> The platform is designed to facilitate easy management of child growth and development. Therefore, all content shared on the platform must be related to child growth and development. Issues unrelated to this topic cannot be addressed through the system.
+          </Text>
+          <Text style={styles.policyText}>
+            <Text style={styles.policySubtitle}>Personal Data Sharing:</Text> All personal data shared in chats remains private between parents and healthcare professionals. Community data is made available to users.
+          </Text>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -113,6 +135,25 @@ const styles = StyleSheet.create({
   },
   answer: {
     fontSize: 16,
+  },
+  policyContainer: {
+    borderWidth: 2,
+    borderRadius: 5,
+    borderColor: 'green',
+    marginTop: 20,
+    padding: 10,
+  },
+  policyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  policySubtitle: {
+    fontWeight: 'bold',
+  },
+  policyText: {
+    fontSize: 16,
+    marginBottom: 10,
   },
 });
 

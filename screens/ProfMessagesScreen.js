@@ -92,8 +92,6 @@ const  ProfMessagesScreen = ({ route }) => {
               },
             });
           }
-
-          // Sort text messages based on timestamp
           fetchedTextMessages.sort((a, b) => b.createdAt - a.createdAt);
 
           setTextMessages(fetchedTextMessages);
