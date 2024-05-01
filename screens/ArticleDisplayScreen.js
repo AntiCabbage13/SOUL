@@ -58,12 +58,14 @@ const ArticleDisplayScreen = () => {
   const fetchArticles = async () => {
     try {
       const query = new Parse.Query('Article');
+      query.descending('createdAt'); // Sort by creation time in descending order
       const result = await query.find();
       setArticles(result);
     } catch (error) {
       console.error('Error fetching articles:', error);
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -81,7 +83,9 @@ const ArticleDisplayScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingTop: 20, 
+    paddingHorizontal: 16, 
+    paddingBottom: 16,
     marginBottom: 16,
   },
   listContainer: {

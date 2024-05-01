@@ -83,17 +83,19 @@ function AppWrapper() {
             options={{ headerShown: false }}
           />
         <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
+      
+        <Stack.Screen
             name="HelpScreen"
             component={HelpScreen}
             options={{ headerShown: false }}
           />
        
        
-           <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
+         
       
          
          <Stack.Screen
