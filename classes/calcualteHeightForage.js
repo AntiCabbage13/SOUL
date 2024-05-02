@@ -122,13 +122,15 @@ async function getHeightForAgeReferenceDataFromAPI() {
       return null;
     }
 
-    // Extract necessary data for z-score calculation
-    const { M, SD0 } = filteredData[0]; // Assuming there's only one matching row
+    const { M,L,S,SD } = filteredData[0]; 
 
-    // Calculate z-score using the standard formula
-    const zScore = (height - parseFloat(M)) / parseFloat(SD0);
-
+   // const zScore = (height - parseFloat(M)) / parseFloat(SD);
+    const zScore = ((Math.pow((height/M), L)) - 1) / (L * S);
     // Log the calculated z-score
+    console.log("Height:", height);
+    console.log("Age in months:", ageInMonths);
+    console.log('m',M);
+    console.log('SD',SD);
     console.log("Calculated z-score:", zScore);
 
     // Insert z-score into the database

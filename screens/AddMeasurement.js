@@ -166,7 +166,9 @@ const AddMeasurement = () => {
       }
 
       await measurement.save();
-      navigation.navigate('Login');
+      getHeightForAgeReferenceDataFromAPI();
+      getWeightForAgeReferenceDataFromAPI();
+      navigation.navigate('ChartsScreen');
     } catch (error) {
       console.error('Error saving measurement data:', error);
       console.log('the retrieved date of birth is', dateOfBirth);

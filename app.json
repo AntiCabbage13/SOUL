@@ -5,10 +5,10 @@
     "version": "1.0.0",
     "scheme": "child",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/growthchart.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/growthchart.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

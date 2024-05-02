@@ -77,38 +77,33 @@ function AppWrapper() {
     <AppProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
-        <Stack.Screen
-            name="HealthcareProfessionalHome"
-            component={HealthcareProfessionalHome}
-            options={{ headerShown: false }}
-          />
-        <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
-      
-        <Stack.Screen
-            name="HelpScreen"
-            component={HelpScreen}
-            options={{ headerShown: false }}
-          />
-       
-       
-         
-      
-         
-         <Stack.Screen
+          <Stack.Screen
             name="Login"
             component={LoginScreen}
             options={{ headerShown: false }}
           />
           <Stack.Screen
+            name="HealthcareProfessionalHome"
+            component={HealthcareProfessionalHome}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="HelpScreen"
+            component={HelpScreen}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
             name="AddFoodAllergyScreen"
             component={AddFoodAllergyScreen}
             options={{ headerShown: false }}
           />
-        
 
           <Stack.Screen
             name="AnalyzedFood"
@@ -124,6 +119,11 @@ function AppWrapper() {
           <Stack.Screen
             name="QuestionnaireUploadScreen"
             component={QuestionnaireUploadScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ChartsScreen"
+            component={ChartsScreen}
             options={{ headerShown: false }}
           />
 

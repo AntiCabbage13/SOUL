@@ -36,8 +36,8 @@ const ArticleUploadScreen = () => {
       return;
     }
 
-    if (title.length > 30) {
-      Alert.alert('Invalid Title', 'Title should be a maximum of 30 characters');
+    if (title.length > 40) {
+      Alert.alert('Invalid Title', 'Title should be a maximum of 40 characters');
       return;
     }
 

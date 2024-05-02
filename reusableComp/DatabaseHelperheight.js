@@ -101,6 +101,7 @@ class DatabaseHelperheight {
             if (results.rows.length > 0) {
               const { ageInMonths } = results.rows.item(0);
               resolve(ageInMonths);
+              console.log('i bear the last inserted row', lastInsertedRow);
             } else {
               reject(new Error("No rows found"));
             }

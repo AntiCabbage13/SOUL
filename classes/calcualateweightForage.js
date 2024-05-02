@@ -144,13 +144,16 @@ async function getWeightForAgeReferenceDataFromAPI() {
     }
 
     // Extract necessary data for z-score calculation
-    const { M, SD0 } = filteredData[0]; // Assuming there's only one matching row
-
+    const { M,S,L,Month } = filteredData[0]; 
     // Calculate z-score using the standard formula
-    const zScore = (weight - parseFloat(M)) / parseFloat(SD0);
-
-    // Log the calculated z-score
-    console.log("Calculated z-score:", zScore);
+   // const zScore = (weight - M) /(S * L);
+    const zScore =   ((Math.pow((weight/M), L)) - 1) / (L * S);
+    console.log('weight',weight);
+    console.log('returned month',Month)
+    console.log("S,",S );
+    console.log("L,",L );
+    console.log('M',M);
+    console.log("Calculated z-score --:", zScore);
 
     // Insert z-score into the database
     try {

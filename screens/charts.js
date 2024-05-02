@@ -16,6 +16,7 @@ const ChartsScreen = () => {
     .then((lastInsertedRow) => {
       const { chronological_sds } = lastInsertedRow;
       setHeightZScore(chronological_sds.toFixed(4));
+      console.log("height z-score:", chronological_sds);
     })
     .catch((error) => {
       console.error("Error fetching height z-score:", error);
@@ -26,6 +27,7 @@ const ChartsScreen = () => {
       .then((lastInsertedRow) => {
         const { chronological_sds } = lastInsertedRow;
         setWeightZScore(chronological_sds.toFixed(4));
+        console.log("weight z-score:", chronological_sds);
       })
       .catch((error) => {
         console.error("Error fetching weight z-score:", error);
