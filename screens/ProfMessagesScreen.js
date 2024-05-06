@@ -138,86 +138,70 @@ const  ProfMessagesScreen = ({ route }) => {
   }, [senderObjectId, RD, db]);
   const allMessages = [...textMessages, ...imageMessages];
   allMessages.sort((a, b) => b.createdAt - a.createdAt);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (senderObjectId && RD) {
-          // Fetch left bubble messages and image URLs
           const [leftBubbleMessages, fetchedImageUrlsData] = await Promise.all([
-            fetchLeftBubbleMessages(RD, senderObjectId),
-            fetchImageUrls(RD, senderObjectId),
+            fetchLeftBubbleMessages(RD, senderObjectId), // Adjusted parameters
+            fetchImageUrls(RD, senderObjectId), // Adjusted parameters
           ]);
-
-          // Map fetched image URLs to the left bubble messages
-          const mappedLeftMessages = leftBubbleMessages.map((message) => {
-            const imageUrl = fetchedImageUrlsData.find(
-              (imageUrl) => imageUrl.user._id === message.user._id
+  
+          let combinedMessages = [];
+  
+          const mappedLeftMessages = leftBubbleMessages.map((message) => ({
+            ...message,
+            position: "left",
+            user: { _id: message.user._id },
+            messageId: message._id, 
+          }));
+  
+          const mappedLeftImages = fetchedImageUrlsData.map((imageUrl) => {
+            const message = leftBubbleMessages.find(
+              (message) => message.user._id === imageUrl.user._id
             );
-
-            return {
-              ...message,
-              position: "left",
-              user: {
-                _id: message.user._id,
-              },
-            };
+  
+            if (message) {
+              return {
+                image: imageUrl.url,
+                position: "left",
+                user: { _id: message.user._id },
+                _id: message._id,
+                createdAt: imageUrl.createdAt,
+              };
+            }
+  
+            return null; 
           });
-
-          // Map fetched image URLs with createdAt to the left bubble messages
-          const mappedLeftImages = leftBubbleMessages.map((message) => {
-            const imageUrl = fetchedImageUrlsData.find(
-              (imageUrl) => imageUrl.user._id === message.user._id
-            );
-
-            return {
-              image: imageUrl ? imageUrl.url : null,
-              position: "left",
-              user: {
-                _id: message.user._id,
-              },
-              createdAt: imageUrl ? imageUrl.createdAt : null, // Add createdAt property
-            };
-          });
-
-          // Combine mapped left bubble messages with sorted text and image messages
-          const combinedMessages = [
-            ...mappedLeftMessages,
+  
+          combinedMessages = [
             ...mappedLeftImages,
+            ...mappedLeftMessages,
             ...textMessages.map((message) => ({
               ...message,
               position: "right",
-              user: {
-                _id: message.user._id,
-                name: "User Name",
-              },
+              user: { _id: message.user._id },
             })),
             ...imageMessages.map((message) => ({
               ...message,
               position: "right",
-              user: {
-                _id: message.user._id,
-                name: "User Name",
-              },
+              user: { _id: message.user._id },
             })),
           ];
-
-          // Sort combined messages by createdAt
+  
           combinedMessages.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
-
-          // Set the combined messages to the messages state variable
           setMessages(combinedMessages);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
+  
     fetchData();
   }, [RD, senderObjectId, textMessages, imageMessages]);
-
+  
   const openPhotoPicker = async () => {
     try {
       await AsyncStorage.setItem(
@@ -252,18 +236,15 @@ const  ProfMessagesScreen = ({ route }) => {
         },
       };
   
-      // Set the message immediately in the local state
       setTextMessages(previousTextMessages =>
         GiftedChat.append(previousTextMessages, [messageToSend])
       );
   
-      // Store the message in AsyncStorage
       await AsyncStorage.setItem(
         "messages",
         JSON.stringify([...textMessages, messageToSend])
       );
   
-      // Send the message to Firestore
       const chatRef = doc(db, "chats", `${senderObjectId}_${RD}`);
       await addDoc(collection(chatRef, "messages"), {
         content: text.trim(),
@@ -272,14 +253,12 @@ const  ProfMessagesScreen = ({ route }) => {
         timestamp: serverTimestamp(),
       });
   
-      // Clear the input text after sending the message
       setText("");
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
   
-
   return (
     <View style={{ flex: 1 }}>
       <Modal

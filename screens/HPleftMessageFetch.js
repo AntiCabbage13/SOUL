@@ -52,11 +52,12 @@ export const fetchLeftBubbleMessages = async (receiverId, senderObjectId) => {
 
       // Sort messages based on timestamp
       fetchedMessages.sort((a, b) => b.createdAt - a.createdAt);
-
-      console.log("Fetched Messages:", fetchedMessages);
+0
       console.log("Receiver ID:", receiverId);
       console.log("Sender Object ID:", senderObjectId);
+      console.log("Fetched Messages:", fetchedMessages);
       return fetchedMessages;
+
     }
   } catch (error) {
     console.error("Error fetching left bubble messages:", error);
@@ -64,7 +65,7 @@ export const fetchLeftBubbleMessages = async (receiverId, senderObjectId) => {
   }
 };
 
-export const fetchImageUrls = async (receiverId, senderObjectId) => {
+/* export const fetchImageUrls = async (receiverId, senderObjectId) => {
   try {
     // Query Firestore to find the file with the correct receiverId and senderId
     const filesQuery = query(
@@ -96,6 +97,44 @@ export const fetchImageUrls = async (receiverId, senderObjectId) => {
 
     console.log("Left side URLs:", downloadURLs);
 
+    return downloadURLs;
+  } catch (error) {
+    console.error("Error fetching image URLs:", error);
+    throw error;
+  }
+};
+
+ */
+
+export const fetchImageUrls = async (receiverId, senderObjectId) => {
+  try {
+    // Query Firestore to find the file with the correct receiverId and senderId
+    const filesQuery = query(
+      collection(db, "files"),
+      where("receiverId", "==", senderObjectId),
+      where("senderId", "==", receiverId)
+    );
+
+    const querySnapshot = await getDocs(filesQuery);
+    const downloadURLs = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const url = data.url;
+      const createdAt = new Date(data.createdAt);
+
+      downloadURLs.push({
+        _id: doc.id,
+        createdAt: createdAt,
+        user: {
+          _id: data.senderId,
+        },
+        url: url,
+      });
+    });
+
+    console.log("Left side URLs:", downloadURLs);
+    console.log("executed");
     return downloadURLs;
   } catch (error) {
     console.error("Error fetching image URLs:", error);

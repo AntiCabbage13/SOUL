@@ -96,6 +96,8 @@ const MessagesScreen = ({ route }) => {
           fetchedTextMessages.sort((a, b) => b.createdAt - a.createdAt);
 
           setTextMessages(fetchedTextMessages);
+          console.log("text messages right", fetchedTextMessages);
+          console.log('invoked');
         }
       } catch (error) {
         console.error("Error fetching text messages from Firestore:", error);
@@ -129,6 +131,7 @@ const MessagesScreen = ({ route }) => {
           });
           fetchedImageMessages.sort((a, b) => a.createdAt - b.createdAt);
           setImageMessages(fetchedImageMessages);
+          console.log("fetched images right", fetchedImageMessages);
         }
       } catch (error) {
         console.error("Error fetching image URLs:", error);
@@ -144,53 +147,64 @@ const MessagesScreen = ({ route }) => {
     const fetchData = async () => {
       try {
         if (senderObjectId && objectId) {
-          // Fetch left bubble messages and image URLs
           const [leftBubbleMessages, fetchedImageUrlsData] = await Promise.all([
             fetchLeftBubbleMessages(objectId, senderObjectId),
             fetchImageUrls(objectId, senderObjectId),
           ]);
+          console.log('invoked');
+          let combinedMessages = []; // Initialize combinedMessages as an empty array
 
-          // Map fetched image URLs to the left bubble messages
           const mappedLeftMessages = leftBubbleMessages.map((message) => {
-            const imageUrl = fetchedImageUrlsData.find(
-              (imageUrl) => imageUrl.user._id === message.user._id
-            );
-
             return {
               ...message,
               position: "left",
               user: {
                 _id: message.user._id,
               },
+              // messageId can remain the same as _id from fetchedMessages
+              messageId: message._id,
             };
           });
+          console.log('invoked');
+          const mappedLeftImages = fetchedImageUrlsData
+            .map((imageUrl) => {
+              const message = fetchedImageUrlsData.find(
+                (message) => message.user._id === imageUrl.user._id
+              );
 
-          // Map fetched image URLs with createdAt to the left bubble messages
-          const mappedLeftImages = leftBubbleMessages.map((message) => {
-            const imageUrl = fetchedImageUrlsData.find(
-              (imageUrl) => imageUrl.user._id === message.user._id
-            );
+              if (message) {
+                const existingMessageIndex = combinedMessages.findIndex(
+                  (msg) => msg._id === message._id && msg.position === "left"
+                );
 
-            return {
-              image: imageUrl ? imageUrl.url : null,
-              position: "left",
-              user: {
-                _id: message.user._id,
-              },
-              createdAt: imageUrl ? imageUrl.createdAt : null, // Add createdAt property
-            };
-          });
+                if (existingMessageIndex === -1) {
+                  return {
+                    image: imageUrl.url,
+                    position: "left",
+                    user: {
+                      _id: message.user._id,
+                    },
+                    _id: message.messageId,
+                    createdAt: imageUrl.createdAt,
+                  };
+                }
+              }
 
-          // Combine mapped left bubble messages with sorted text and image messages
-          const combinedMessages = [
-            ...mappedLeftMessages,
+              return null; // Return null if the message already exists or if no corresponding message is found
+            })
+            .filter((message) => message !== null); 
+          console.log("comnbined left images", combinedMessages);
+          console.log('invoked');
+          combinedMessages = [
             ...mappedLeftImages,
+            ...mappedLeftMessages,
             ...textMessages.map((message) => ({
               ...message,
               position: "right",
               user: {
                 _id: message.user._id,
-                name: "User Name",
+                _id: message.messageId,
+              
               },
             })),
             ...imageMessages.map((message) => ({
@@ -198,18 +212,17 @@ const MessagesScreen = ({ route }) => {
               position: "right",
               user: {
                 _id: message.user._id,
-                name: "User Name",
+                _id: message.messageId,
               },
             })),
           ];
 
-          // Sort combined messages by createdAt
           combinedMessages.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
 
-          // Set the combined messages to the messages state variable
           setMessages(combinedMessages);
+          console.log("combined messages", combinedMessages);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -217,7 +230,7 @@ const MessagesScreen = ({ route }) => {
     };
 
     fetchData();
-  }, [objectId, senderObjectId, textMessages, imageMessages]);
+  }, [objectId, senderObjectId, textMessages, imageMessages]); 
 
   const openPhotoPicker = async () => {
     try {
@@ -290,7 +303,10 @@ const MessagesScreen = ({ route }) => {
       </Modal>
 
       <GiftedChat
-        messages={messages}
+        messages={messages.map((message) => ({
+          ...message,
+          _id: message.messageId,
+        }))}
         onSend={onSend}
         user={{ _id: senderObjectId }}
         renderInputToolbar={(props) => (
@@ -340,7 +356,7 @@ const MessagesScreen = ({ route }) => {
               position={position}
               wrapperStyle={{
                 right: {
-                  backgroundColor: 'transparent',
+                  backgroundColor: "transparent",
                   margin: 5,
                   marginVertical: 14,
                   padding: 9,
@@ -350,7 +366,7 @@ const MessagesScreen = ({ route }) => {
                   borderStyle: "dotted",
                 },
                 left: {
-                  backgroundColor:'transparent',
+                  backgroundColor: "transparent",
                   margin: 5,
                   marginVertical: 14,
                   padding: 5,
@@ -362,30 +378,14 @@ const MessagesScreen = ({ route }) => {
                 },
               }}
             >
+              {/* Render text message if present */}
               {props.currentMessage.text && !props.currentMessage.image && (
                 <Text>{props.currentMessage.text}</Text>
               )}
+              {/* Render image message if present */}
               {props.currentMessage.image && (
                 <View style={{ width: 200, height: 200 }}>
-                  <ImageBackground
-                    source={{ uri: props.currentMessage.image }}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: "rgba(0, 128, 0, 0.5)",
-                        padding: 5,
-                      }}
-                    >
-                      <Text style={{ color: "black" }}>
-                        {props.currentMessage.text}
-                      </Text>
-                    </View>
-                  </ImageBackground>
+                  {/* Your image rendering logic */}
                 </View>
               )}
             </Bubble>

@@ -16,7 +16,7 @@ import setupNotifications from "../reusableComp/mealReminder";
 import DatabaseHelperheight from "../reusableComp/DatabaseHelperheight";
 import AllergyDatabaseHelper from "../reusableComp/AllergyDatabaseHelper";
 import { setmealtype } from "../classes/NutrientAnalysis";
-import {FoodAnalysisCall} from'../classes/FoodAnallysisCall';
+import { FoodAnalysisCall } from "../classes/FoodAnallysisCall";
 import DatabaseHelper from "../reusableComp/DatabaseHelper";
 const FoodEntryForm = ({ route }) => {
   const mealprep = new MealPrep();
@@ -37,10 +37,6 @@ const FoodEntryForm = ({ route }) => {
   useEffect(() => {
     setmealtype(MealType);
   }, [MealType, setmealtype]);
-
-  
-
-
 
   const renderMealView = (meal) => (
     <TouchableOpacity
@@ -296,12 +292,14 @@ const FoodEntryForm = ({ route }) => {
         </View>
       </ScrollView>
 
-      {/* Floating Button for Add to Database */}
-      <TouchableWithoutFeedback onPress={handleAddToDatabase}>
-        <View style={styles.floatingButton}>
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={handleAddToDatabase}
+      >
+        <View>
           <Text style={styles.buttonText}>+</Text>
         </View>
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
     </View>
   );
 };

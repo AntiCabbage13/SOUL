@@ -15,15 +15,11 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-
 const db = getFirestore();
 const storage = getStorage();
-
 export const fetchLeftBubbleMessages = async (objectId, senderObjectId) => {
-
   try {
     if (senderObjectId && objectId) {
-      
       const chatId = `${objectId}_${senderObjectId}`;
       const chatRef = doc(db, "chats", chatId);
       const chatSnap = await getDoc(chatRef);
@@ -50,12 +46,10 @@ export const fetchLeftBubbleMessages = async (objectId, senderObjectId) => {
         });
       }
 
-      // Sort messages based on timestamp
       fetchedMessages.sort((a, b) => b.createdAt - a.createdAt);
-
-      console.log('Fetched Messages:', fetchedMessages);
-      console.log('object id',objectId);
-      console.log('sender object id ', senderObjectId);
+      console.log("object id", objectId);
+      console.log("sender object id ", senderObjectId);
+      console.log("Fetched Messages:", fetchedMessages);
       return fetchedMessages;
     }
   } catch (error) {
@@ -63,9 +57,6 @@ export const fetchLeftBubbleMessages = async (objectId, senderObjectId) => {
     throw error;
   }
 };
-
-
-
 export const fetchImageUrls = async (objectId, senderObjectId) => {
   try {
     // Query Firestore to find the file with the correct receiverId and senderId
@@ -79,24 +70,27 @@ export const fetchImageUrls = async (objectId, senderObjectId) => {
     const downloadURLs = [];
 
     querySnapshot.forEach((doc) => {
-      const { url } = doc.data();
+      const data = doc.data();
+      const url = data.url;
+      const createdAt = new Date(data.createdAt);
+
       downloadURLs.push({
         _id: doc.id,
-        createdAt: new Date(doc.data().createdAt), // Convert createdAt to Date object
-        user: {
-          _id: doc.data().senderId,
-        },
+        createdAt: createdAt,
+       // user: {
+       //   _id: data.senderId,
+        //},
+        user: { _id: objectId },
         url: url,
       });
     });
 
-    console.log('Left side URLs:', downloadURLs);
-
+    console.log("Left side URLs:", downloadURLs);
+    console.log("executed");
     return downloadURLs;
   } catch (error) {
     console.error("Error fetching image URLs:", error);
     throw error;
   }
 };
-
 

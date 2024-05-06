@@ -77,9 +77,15 @@ function AppWrapper() {
     <AppProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator>
+      
           <Stack.Screen
             name="Login"
             component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+            <Stack.Screen
+            name="Home"
+            component={HomeScreen}
             options={{ headerShown: false }}
           />
           <Stack.Screen
@@ -87,11 +93,7 @@ function AppWrapper() {
             component={HealthcareProfessionalHome}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
+         
 
           <Stack.Screen
             name="HelpScreen"
