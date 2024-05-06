@@ -3,9 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert,StyleSheet }
 import Parse from 'parse/react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import HealthcareProfessionalHome from "./HealthcareProfessionalHome.js";
-import {getChildData} from '../classes/getChildData';
-import {getChildDataWeight} from '../classes/getChildDataWeight';
-
+import { getHeightForAgeReferenceDataFromAPI } from "../classes/calcualteHeightForage";
+import { getWeightForAgeReferenceDataFromAPI } from "../classes/calcualateweightForage";
 
 const AddMeasurementprof = () => {
   const navigation = useNavigation();
@@ -94,21 +93,23 @@ console.log('prof screen',childObjectId,childGender,childDateOfBirth);
       }
 
       if (height !== '') {
-        // If height is available, call getChildData
-        getChildData({ objectId: childObjectIdState, childDateOfBirthh: isoDateString, childGender: genderState, height: height });
+        getHeightForAgeReferenceDataFromAPI();
       }if (weight !== '') {
         // If weight is available, call getChildDataWeight
-        getChildDataWeight({ objectId: childObjectIdState, childDateOfBirth: isoDateString, childGender: genderState, weight: weight });
+        getWeightForAgeReferenceDataFromAPI();
         console.log('Calling getChildDataWeight');
       }
 
       await measurement.save();
+   
     } catch (error) {
       console.error('Error saving measurement data:', error);
     }
 
-    // Navigate to HealthcareProfessionalHome screen
-    navigation.navigate('HealthcareProfessionalHome');
+
+
+    navigation.navigate('ChartsScreen');
+
   };
 
   return (

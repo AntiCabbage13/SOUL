@@ -264,9 +264,17 @@ const MessagesScreen = ({ route }) => {
         },
       };
 
-      setTextMessages((previousTextMessages) =>
+     /*  setTextMessages((previousTextMessages) =>
         GiftedChat.append(previousTextMessages, [messageToSend])
-      );
+      ); */
+      setTextMessages(previousTextMessages => {
+        if (messageToSend.user._id === senderObjectId) {
+          return GiftedChat.append(previousTextMessages, [messageToSend]);
+        }
+        return previousTextMessages;
+      });
+      
+
 
       await AsyncStorage.setItem(
         "messages",

@@ -176,6 +176,13 @@ const AddMeasurement = () => {
     }
   };
 
+
+
+
+
+
+  
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
