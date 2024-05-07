@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Icon from "react-native-vector-icons/FontAwesome";
 import MealPrep from "../classes/mealPrep";
 import { useNavigation } from "@react-navigation/native";
 import setupNotifications from "../reusableComp/mealReminder";
@@ -292,13 +293,8 @@ const FoodEntryForm = ({ route }) => {
         </View>
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={handleAddToDatabase}
-      >
-        <View>
-          <Text style={styles.buttonText}>+</Text>
-        </View>
+      <TouchableOpacity style={styles.floatingButton} onPress={handleAddToDatabase} >
+        <Icon name={"plus"} size={30} color="#fff" />
       </TouchableOpacity>
     </View>
   );
